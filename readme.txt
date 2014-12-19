@@ -34,8 +34,8 @@ I know you love lists, so here we go. Time for the list:
 - **Ticketing**: users submit tickets from the front-end, agents cherish them from the back-end
 - **E-mail notifications**: whenever someone does something, the interested parties are notified by e-mail and all e-mails are customizable
 - **Restricted access**: everything you say is strictly private. It all stays between the client and the agents
-- **File upload**: you control when files can be uploaded, haw many and how big
-- **Multiple products**: provide support for as manu products as you want
+- **File upload**: you control when files can be uploaded, how many and how big
+- **Multiple products**: provide support for as many products as you want
 - **Custom fields**: need more fields? You have full control over it
 - **Terms & conditions**: ask users to approve your terms before they can raise a ticket
 - **Old tickets**: identify old tickets in a second thanks to the tags
