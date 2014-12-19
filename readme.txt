@@ -9,7 +9,7 @@ Stable tag: 3.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-The most advanced ticketing system for WordPress. Provide awesome support directly from your WordPress site.
+The most advanced support plugin for WordPress. Provide awesome support straight from your WordPress site.
 
 == Description ==
 
