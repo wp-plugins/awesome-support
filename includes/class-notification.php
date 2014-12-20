@@ -116,9 +116,13 @@ class WPAS_Notification {
 
 		if ( is_null( $this->message ) || false === $this->case ) {
 			return false;
-		} 
+		}
 
-		return $this->template();
+		ob_start();
+		$this->template();
+		$notification = ob_get_clean();
+		
+		return $notification;
 
 	}
 
@@ -238,11 +242,11 @@ function wpas_notification( $case = false, $message = false, $echo = true ) {
 	$notification = new WPAS_Notification( $case, $message );
 
 	if( true === $echo ) {
-		echo $notification->notify( $case, $message );
+		echo $notification->notify();
 	}
 
 	else {
-		return $notification->notify( $case, $message );
+		return $notification->notify();
 	}
 
 }
