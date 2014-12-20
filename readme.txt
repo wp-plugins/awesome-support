@@ -5,7 +5,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: support,helpdesk,tickets,ticketing,help,support staff,
 Requires at least: 3.5.1
 Tested up to: 4.1
-Stable tag: 3.0.0
+Stable tag: 3.0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -13,7 +13,9 @@ The most advanced support plugin for WordPress. Provide awesome support straight
 
 == Description ==
 
-Awesome Support is the most advanced ticketing system for WordPress. It is the result of two years of work, research and improvement. Most of its features are an answer to users requests and that's what makes it the best support plugin for WordPress. For support please visit the [official site](http://getawesomesupport.com).
+Awesome Support is the most advanced ticketing system for WordPress. It is the result of two years of work, research and improvement. Most of its features are an answer to users requests and that's what makes it the best support plugin for WordPress.
+
+For support please visit the [official site](http://getawesomesupport.com).
 
 = Seamless Integration =
 
@@ -25,7 +27,9 @@ What if your clients need to submit a ticket on the go? No worries! The plugin i
 
 = Robust Code =
 
-Version 3 of this support plugin was built with flexibility in mind: the code is clean, well documented and full of hooks. If you need a very custom support system, Awesome Support will let you do almost anything you want. Awesome Support relies on the [Titan Framework](http://www.titanframework.net/) to handle plugin options. This framework is built by expert WordPress developers and well maintained on GitHub.
+Version 3 of this support plugin was built with flexibility in mind: the code is clean, well documented and full of hooks. If you need a very custom support system, Awesome Support will let you do almost anything you want.
+
+Awesome Support relies on the [Titan Framework](http://www.titanframework.net/) to handle plugin options. This framework is built by expert WordPress developers and well maintained on GitHub.
 
 = What does it do? =
 
@@ -55,6 +59,12 @@ Wanna know what's coming next in Awesome Support? [Check out the roadmap](https:
 3. All the required configuration will be done silently by the plugin
 3. Your support site is ready!
 
+== Frequently Asked Questions ==
+
+= The plugin data isn't removed from the database after uninstall =
+
+If you want to delete the plugin and all of its data, you need to go to the *Advanced* tab in the plugin settings and check the *Delete Data* option. Only then the data will be removed from the database during the uninstall process.
+
 == Screenshots ==
 
 1. Agent's view (tickets list)
@@ -67,10 +77,17 @@ Wanna know what's coming next in Awesome Support? [Check out the roadmap](https:
 
 == Changelog ==
 
+= 3.0.1 =
+
+* Display taxonomies drop-downs hierarchically
+* Add new hooks in the user registration process ([81a278a](https://github.com/ThemeAvenue/Awesome-Support/commit/81a278a807d3d41bbfc9327908365f3eff07e34a))
+* Filter the value returned by `wpas_get_option()`
+* Minor bugfixes and improvements
+
 = 3.0.0 =
 
 * The Phoenix reborn. An entirely new version of Awesome Support
 
 == Upgrade Notice ==
 
-The brand new version of Awesome Support. Everything works better in v3!
+Version 3.0.1 adds compatibility for some of the latest add-on available (such as the [MailChimp](http://getawesomesupport.com/addons/mailchimp/) add-on).
