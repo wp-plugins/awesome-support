@@ -13,27 +13,27 @@ The most advanced support plugin for WordPress. Provide awesome support straight
 
 == Description ==
 
-Awesome Support is the most advanced ticketing system for WordPress. It is the result of two years of work, research and improvement. Most of its features are an answer to users requests and that's what makes it the best support plugin for WordPress.
+Awesome Support is the most advanced support plugin for WordPress. It is the result of two years of work, research, and improvement. Most of its features are an answer to user requests for a helpdesk and that's what makes it the best support plugin for WordPress.
 
 For support please visit the [official site](http://getawesomesupport.com).
 
 = Seamless Integration =
 
-Awesome Support was built in a way that makes it compatible with 99% of all existing themes, be it free or commercial. It is "plug & play": all settings and templates are ready to work as soon as you clicked the "Activate" button.
+No complicated installation here! Awesome Support was built in a way that makes it compatible with 99% of all existing themes, be it free or commercial. It is "plug & play" meaning  all settings and templates are ready to work as soon as you click the "Activate" button.
 
 = Responsive Design =
 
-What if your clients need to submit a ticket on the go? No worries! The plugin is responsive. Even from a mobile, your client will have a smooth and pleasant experience (as long as the theme you use is responsive).
+Awesome Support provides an optimal viewing experience; easy reading and navigation with a minimum of resizing, panning, and scrolling. Have a client that needs to submit a ticket on the go? No worries! The plugin is responsive. Your client will have a smooth and pleasant experience even from the convenience of their mobile phone (as long as the theme you use is responsive).
 
 = Robust Code =
 
-Version 3 of this support plugin was built with flexibility in mind: the code is clean, well documented and full of hooks. If you need a very custom support system, Awesome Support will let you do almost anything you want.
+Version 3 of this support plugin was built with flexibility in mind; the code is clean, well-documented and full of hooks. If you need a   custom support system, Awesome Support will let you do almost anything you want or need.
 
-Awesome Support relies on the [Titan Framework](http://www.titanframework.net/) to handle plugin options. This framework is built by expert WordPress developers and well maintained on GitHub.
+Awesome Support relies on the [Titan Framework](http://www.titanframework.net/) to handle plugin options. This framework is built by expert WordPress developers and well-maintained on GitHub.
 
 = What does it do? =
 
-I know you love lists, so here we go. Time for the list:
+Check out all of the awesome, user-friendly features of this plugin:
 
 - **Ticketing**: users submit tickets from the front-end, agents cherish them from the back-end
 - **E-mail notifications**: whenever someone does something, the interested parties are notified by e-mail and all e-mails are customizable
@@ -46,11 +46,11 @@ I know you love lists, so here we go. Time for the list:
 
 = Extensions =
 
-We packed a whole bunch of features in Awesome Support. Once activated, you're ready to provide world-class support. If you want to go even further though, we've got you covered: dozens of addons will allow you to extend the plugin's possibilities and gain in productivity. To check out the available addons please visit the official site [getawesomesupport.com](http://getawesomesupport.com).
+Packed with features, once activated Awesome Support is ready to give you world-class support.  If you want to go even further though, we've got you covered: dozens of add-ons will allow you to extend the plugin's possibilities and gain even more productivity. To check out the available add-ons please visit the official site [getawesomesupport.com](http://getawesomesupport.com).
 
 = Roadmap =
 
-Wanna know what's coming next in Awesome Support? [Check out the roadmap](https://trello.com/b/pHYdtkHc). You can also vote for the ideas you like best.
+Want to know what’s next for Awesome Support? [Check out the roadmap](https://trello.com/b/pHYdtkHc). You can also vote for the ideas you like best!
 
 == Installation ==
 
