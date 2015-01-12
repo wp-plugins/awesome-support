@@ -54,16 +54,66 @@ Want to know what’s next for Awesome Support? [Check out the roadmap](https://
 
 == Installation ==
 
-1. Upload `awesome-support` to the `/wp-content/plugins/` directory or upload `awesome-support.zip` through your WordPress admin
-2. Activate the plugin through the 'Plugins' menu in WordPress
-3. All the required configuration will be done silently by the plugin
-3. Your support site is ready!
+= Using The WordPress Dashboard =
+
+1. Navigate to the 'Add New' in the plugins dashboard
+2. Search for 'Awesome Support'
+3. Click 'Install Now'
+4. Activate the plugin on the Plugin dashboard
+
+= Uploading in WordPress Dashboard =
+
+1. Download `awesome-support.zip` from this page
+2. Navigate to the 'Add New' in the plugins dashboard
+3. Navigate to the 'Upload' area
+4. Select `awesome-support.zip` from your computer
+5. Click 'Install Now'
+6. Activate the plugin in the Plugin dashboard
+
+= Using FTP =
+
+1. Download `awesome-support.zip` from this page
+2. Extract the `awesome-support` directory to your computer
+3. Upload the `awesome-support` directory to the `/wp-content/plugins/` directory
+4. Activate the plugin in the Plugin dashboard
+
+= Setup =
+
+Whatever the method you used, after you activated the plugin through the plugins dashboard, the setup is done silently in the background.
+
+Two new pages will be added to your site:
+
+- My Tickets
+- Submit ticket
+
+Add those two pages to your menu in order to give your users easy access to their support area.
 
 == Frequently Asked Questions ==
 
 = The plugin data isn't removed from the database after uninstall =
 
 If you want to delete the plugin and all of its data, you need to go to the *Advanced* tab in the plugin settings and check the *Delete Data* option. Only then the data will be removed from the database during the uninstall process.
+
+= Users get "You do not have the capacity to open a new ticket" =
+
+Normally, when a user registers through the plugin, he is given the role *Support User*. [This role has special capabilities](http://codex.wordpress.org/Roles_and_Capabilities).
+
+If your users get the error message *"You do not have the capacity to open a new ticket"*, it means that they don't have the special capabilities.
+
+Here you have two choices:
+
+1. Change all your users' role to *Support User*
+2. Give the role you want to use (eg. *Subscriber*) the special capabilities
+
+If you don't know how to add new capabilities to a role, I suggest you use a plugin like [User Role Manager](https://wordpress.org/plugins/user-role-editor/) and give the desired role the following capabilities:
+
+- `view_ticket`
+- `create_ticket`
+- `close_ticket`
+- `reply_ticket`
+- `attach_files`
+
+**Do not give your users more than those 5 capabilities**, otherwise they could get administrative privileges.
 
 == Screenshots ==
 
