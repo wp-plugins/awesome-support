@@ -98,12 +98,12 @@ class Awesome_Support_Admin {
 			/* Do Actions. */
 			add_action( 'pre_get_posts',             array( $this, 'hide_others_tickets' ), 10, 1 );
 			add_action( 'admin_init',                array( $this, 'system_tools' ), 10, 0 );
-			add_action( 'admin_init',                array( $this, 'remote_notifications' ), 10, 0 );
+			add_action( 'plugins_loaded',            array( $this, 'remote_notifications' ), 15, 0 );
 			add_action( 'admin_enqueue_scripts',     array( $this, 'enqueue_admin_styles' ) );              // Load plugin styles
 			add_action( 'admin_enqueue_scripts',     array( $this, 'enqueue_admin_scripts' ) );             // Load plugin scripts
 			add_action( 'admin_menu',                array( $this, 'register_submenu_items' ) );            // Register all the submenus
 			add_action( 'admin_menu',                array( $this, 'tickets_count' ) );                     // Add the tickets count
-			add_action( 'admin_notices',             array( $this, 'wpas_admin_notices' ) );                // Display custom admin notices
+			add_action( 'admin_notices',             array( $this, 'admin_notices' ) );                     // Display custom admin notices
 			add_action( 'add_meta_boxes',            array( $this, 'metaboxes' ) );                         // Register the metaboxes
 			add_action( 'save_post_ticket',          array( $this, 'save_ticket' ) );                       // Save all custom fields
 			add_action( 'wpas_add_reply_after',      array( $this, 'mark_replies_read' ), 10, 2 );          // Mark a ticket replies as read
@@ -419,13 +419,13 @@ class Awesome_Support_Admin {
 	 * @since  3.0.0
 	 * @return void
 	 */
-	public function wpas_admin_notices() {
+	public function admin_notices() {
 
-		if ( isset( $_GET['message'] ) ) {
+		if ( isset( $_GET['wpas-message'] ) ) {
 
-			switch( $_GET['message'] ) {
+			switch( $_GET['wpas-message'] ) {
 
-				case 'wpas-opened':
+				case 'opened':
 					?>
 					<div class="updated">
 						<p><?php printf( __( 'The ticket #%s has been (re)opened.', 'wpas' ), intval( $_GET['post'] ) ); ?></p>
@@ -433,7 +433,7 @@ class Awesome_Support_Admin {
 					<?php
 				break;
 
-				case 'wpas-closed':
+				case 'closed':
 					?>
 					<div class="updated">
 						<p><?php printf( __( 'The ticket #%s has been closed.', 'wpas' ), intval( $_GET['post'] ) ); ?></p>
@@ -523,7 +523,7 @@ class Awesome_Support_Admin {
 	public function register_submenu_items() {
 		add_submenu_page( 'edit.php?post_type=ticket', __( 'System Status', 'wpas' ), __( 'System Status', 'wpas' ), 'administrator', 'wpas-status', array( $this, 'display_status_page' ) );
 		add_submenu_page( 'edit.php?post_type=ticket', __( 'Awesome Support Addons', 'wpas' ), '<span style="color:#f39c12;">' . __( 'Addons', 'wpas' ) . '</span>', 'edit_posts', 'wpas-addons', array( $this, 'display_addons_page' ) );
-		add_submenu_page( 'edit.php?post_type=ticket', __( 'About Awesome Support', 'wpas' ), __( 'About', 'wpas' ), 'edit_posts', 'wpas-about', array( $this, 'display_about_page' ) );
+		add_submenu_page( 'options.php', __( 'About Awesome Support', 'wpas' ), __( 'About', 'wpas' ), 'edit_posts', 'wpas-about', array( $this, 'display_about_page' ) );
 	}
 
 	/**
@@ -623,12 +623,9 @@ class Awesome_Support_Admin {
 
 				if( isset( $_GET['post'] ) && 'ticket' == get_post_type( intval( $_GET['post'] ) ) ) {
 
-					update_post_meta( intval( $_GET['post'] ), '_wpas_status', 'closed' );
+					$url = add_query_arg( array( 'post' => $_GET['post'], 'action' => 'edit', 'wpas-message' => 'closed' ), admin_url( 'post.php' ) );
 
-					$url = add_query_arg( array( 'post' => $_GET['post'], 'action' => 'edit', 'message' => 'wpas-closed' ), admin_url( 'post.php' ) );
-
-					wpas_log( $_GET['post'], __( 'The ticket was closed.', 'wpas' ) );
-					do_action( 'wpas_after_close_ticket', intval( $_GET['post'] ) );
+					wpas_close_ticket( $_GET['post'] );
 
 				}
 
@@ -638,11 +635,10 @@ class Awesome_Support_Admin {
 
 				if( isset( $_GET['post'] ) && 'ticket' == get_post_type( intval( $_GET['post'] ) ) ) {
 
-					update_post_meta( intval( $_GET['post'] ), '_wpas_status', 'open' );
+					$url = add_query_arg( array( 'post' => $_GET['post'], 'action' => 'edit', 'wpas-message' => 'opened' ), admin_url( 'post.php' ) );
 
-					$url = add_query_arg( array( 'post' => $_GET['post'], 'action' => 'edit', 'message' => 'wpas-opened' ), admin_url( 'post.php' ) );
+					wpas_reopen_ticket( $_GET['post'] );
 
-					wpas_log( $_GET['post'], __( 'The ticket was re-opened.', 'wpas' ) );
 				}
 
 			break;
@@ -876,7 +872,7 @@ class Awesome_Support_Admin {
 					do_action( 'wpas_save_reply_after_error', $reply );
 
 					/* Set the redirection */
-					$_SESSION['wpas_redirect'] = add_query_arg( array( 'message' => 'wpas_reply_error' ), get_permalink( $post_id ) );
+					$_SESSION['wpas_redirect'] = add_query_arg( array( 'wpas-message' => 'wpas_reply_error' ), get_permalink( $post_id ) );
 
 				} else {
 

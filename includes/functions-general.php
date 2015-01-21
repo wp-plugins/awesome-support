@@ -300,3 +300,36 @@ function wpas_redirect( $case, $location = null, $post_id = null ) {
 	return true;
 
 }
+
+/**
+ * Write log file.
+ *
+ * Wrapper function for WPAS_Logger. The function
+ * will open (or create if needed) a log file
+ * and write the $message at the end of it.
+ *
+ * @since  3.0.2
+ * @param  string $handle  The log file handle
+ * @param  string $message The message to write
+ * @return void
+ */
+function wpas_write_log( $handle, $message ) {
+	$log = new WPAS_Logger( $handle );
+	$log->add( $message );
+}
+
+/**
+ * Show a warning if dependencies aren't loaded.
+ *
+ * If the dependencies aren't present in the plugin folder
+ * we display a warning to the user and explain him how to 
+ * fix the issue.
+ *
+ * @since  3.0.2
+ * @return void
+ */
+function wpas_missing_dependencied() { ?>
+	<div class="error">
+        <p><?php printf( __( 'Awesome Support dependencies are missing. The plugin can&#39;t be loaded properly. Please run %s before anything else. If you don&#39;t know what this is you should <a href="%s" class="thickbox">install the production version</a> of this plugin instead.', 'wpas' ), '<a href="https://getcomposer.org/doc/00-intro.md#using-composer" target="_blank"><code>composer install</code></a>', esc_url( add_query_arg( array( 'tab' => 'plugin-information', 'plugin' => 'awesome-support', 'TB_iframe' => 'true', 'width' => '772', 'height' => '935' ), admin_url( 'plugin-install.php' ) ) ) ); ?></p>
+    </div>
+<?php }

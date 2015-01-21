@@ -12,7 +12,6 @@
  * @copyright 2014 ThemeAvenue
  */
 
-add_filter( 'the_content', 'wpas_single_ticket' );
 /**
  * Alter page content for single ticket.
  *
@@ -31,9 +30,6 @@ function wpas_single_ticket( $content ) {
 
 	global $post;
 
-	/* Remove the filter to avoid infinite loops. */
-	remove_filter( 'the_content', 'wpas_single_ticket' );
-
 	$slug = 'ticket';
 
 	/* Don't touch the admin */
@@ -45,6 +41,19 @@ function wpas_single_ticket( $content ) {
 	if ( $slug !== $post->post_type ) {
 		return $content;
 	}
+
+	/* Only apply this on the main query. */
+	if( ! is_main_query() ) {
+		return $content;
+	}
+
+	/* Only apply this if it's inside of a loop. */
+	if( ! in_the_loop() ) {
+		return $content;
+	}
+
+	/* Remove the filter to avoid infinite loops. */
+	remove_filter( 'the_content', 'wpas_single_ticket' );
 
 	/* Check if the current user can view the ticket */
 	if ( !wpas_can_view_ticket( $post->ID ) ) {

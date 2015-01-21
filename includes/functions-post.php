@@ -235,13 +235,13 @@ function wpas_insert_ticket( $data = array(), $post_id = false, $agent_id = fals
 		$agent_id = wpas_find_agent( $ticket_id );
 	}
 
+	/* Assign an agent to the ticket */
+	wpas_assign_ticket( $ticket_id, $agent_id, false );
+
 	/**
 	 * Fire wpas_after_open_ticket just after the post is successfully submitted.
 	 */
 	do_action( 'wpas_open_ticket_after', $ticket_id, $data );
-
-	/* Assign an agent to the ticket */
-	add_post_meta( $ticket_id, '_wpas_assignee', $agent_id, true );
 
 	return $ticket_id;
 
@@ -340,15 +340,15 @@ function wpas_add_reply( $data, $parent_id = false, $author_id = false ) {
 	$data = wp_parse_args( $data, $defaults );
 
 	if ( false !== $author_id ) {
-		$defaults['post_author'] = $author_id;
+		$data['post_author'] = $author_id;
 	} else {
 		global $current_user;
-		$defaults['post_author'] = $current_user->ID;
+		$data['post_author'] = $current_user->ID;
 	}
 
 	$insert = wpas_insert_reply( $data, $parent_id );
 
-	if ( $insert && user_can( $defaults['post_author'], 'edit_ticket' ) ) {
+	if ( $insert && user_can( $data['post_author'], 'edit_ticket' ) ) {
 		$replies = wpas_get_replies( $parent_id );
 		if ( 1 === count( $replies ) ) {
 			wpas_update_ticket_status( $parent_id, 'processing' );
@@ -667,6 +667,65 @@ function wpas_find_agent( $ticket_id = false ) {
 }
 
 /**
+ * Assign an agent to a ticket.
+ *
+ * Assign the given agent to a ticket or find an available
+ * agent if no agent ID is given.
+ *
+ * @since  3.0.2
+ * @param  integer  $ticket_id    ID of the post in need of a new agent
+ * @param  integer  $agent_id     ID of the agent to assign the ticket to
+ * @param  boolean  $log          Shall the assignment be logged or not
+ * @return object|boolean|integer WP_Error in case of problem, true if no change is required or the post meta ID if the agent was changed
+ */
+function wpas_assign_ticket( $ticket_id, $agent_id = null, $log = true ) {
+
+	if ( 'ticket' !== get_post_type( $ticket_id ) ) {
+		return new WP_Error( 'incorrect_post_type', __( 'The given post ID is not a ticket', 'wpas' ) );
+	}
+
+	if ( is_null( $agent_id ) ) {
+		$agent_id = wpas_find_agent( $ticket_id );
+	}
+
+	if ( !user_can( $agent_id, 'edit_ticket' ) ) {
+		return new WP_Error( 'incorrect_agent', __( 'The chosen agent does not have the sufficient capapbilities to be assigned a ticket', 'wpas' ) );
+	}
+
+	/* Get the current agent if any */
+	$current = get_post_meta( $ticket_id, '_wpas_assignee', true );
+
+	if ( $current === $agent_id ) {
+		return true;
+	}
+
+	$update = update_post_meta( $ticket_id, '_wpas_assignee', $agent_id, $current );
+
+	/* Log the action */
+	if ( true === $log ) {
+		$log = array();
+		$log[] = array(
+			'action'   => 'updated',
+			'label'    => __( 'Support staff', 'wpas' ),
+			'value'    => $agent_id,
+			'field_id' => 'assignee'
+		);
+	}
+
+	wpas_log( $ticket_id, $log );
+
+	/**
+	 * wpas_ticket_assigned hook
+	 *
+	 * since 3.0.2
+	 */
+	do_action( 'wpas_ticket_assigned', $ticket_id, $agent_id );
+
+	return $update;
+
+}
+
+/**
  * Save form values.
  *
  * If the submission fails we save the form values in order to
@@ -720,10 +779,11 @@ function wpas_randomize_uers_query( $query ) {
  * Update the post_status of a ticket
  * using one of the custom status registered by the plugin
  * or its addons.
- * 
- * @param  [type] $post_id [description]
- * @param  [type] $status  [description]
- * @return [type]          [description]
+ *
+ * @since  3.0.0
+ * @param  integer $post_id ID of the ticket being updated
+ * @param  string  $status  New status to attribute
+ * @return boolean          True if the query was successfully executed
  */
 function wpas_update_ticket_status( $post_id, $status ) {
 
@@ -733,20 +793,92 @@ function wpas_update_ticket_status( $post_id, $status ) {
 		return false;
 	}
 
-	global $wpdb;
+	$post = get_post( $post_id );
 
-	$updated = $wpdb->query(
-		$wpdb->prepare(
-			"UPDATE $wpdb->posts SET post_status = '%s' WHERE ID = '%d'",
-			$status,
-			$post_id
-		)
+	if( !$post || $post->post_status === $status ) {
+		return false;
+	}
+
+	$my_post = array(
+		'ID'          => $post_id,
+		'post_status' => $status
 	);
 
-	if ( true === boolval( $updated ) ) {
+	$updated = wp_update_post( $my_post );
+
+	if ( 0 !== intval( $updated ) ) {
 		wpas_log( $post_id, sprintf( __( 'Ticket state changed to &laquo;%s&raquo;', 'wpas' ), $custom_status[$status] ) );
 	}
 
+	/**
+	 * wpas_ticket_status_updated hook
+	 *
+	 * @since  3.0.2
+	 */
+	do_action( 'wpas_ticket_status_updated', $post_id, $status, $updated );
+
 	return $updated;
+
+}
+
+/**
+ * Change a ticket status to closed.
+ *
+ * @since  3.0.2
+ * @param  integer         $ticket_id ID of the ticket to close
+ * @return integer|boolean            ID of the post meta if exists, true on success or false on failure
+ */
+function wpas_close_ticket( $ticket_id ) {
+
+	if ( 'ticket' == get_post_type( $ticket_id ) ) {
+
+		$update = update_post_meta( intval( $ticket_id ), '_wpas_status', 'closed' );
+
+		/* Log the action */
+		wpas_log( $ticket_id, __( 'The ticket was closed.', 'wpas' ) );
+
+		/**
+		 * wpas_after_close_ticket hook
+		 *
+		 * @since  3.0.0
+		 */
+		do_action( 'wpas_after_close_ticket', intval( $ticket_id ), $update );
+
+		return $update;
+
+	} else {
+		return false;
+	}
+
+}
+
+/**
+ * Change a ticket status to open.
+ *
+ * @since  3.0.2
+ * @param  integer         $ticket_id ID of the ticket to re-open
+ * @return integer|boolean            ID of the post meta if exists, true on success or false on failure
+ */
+function wpas_reopen_ticket( $ticket_id ) {
+
+	if ( 'ticket' == get_post_type( $ticket_id ) ) {
+
+		$update = update_post_meta( intval( $ticket_id ), '_wpas_status', 'open' );
+
+		/* Log the action */
+		wpas_log( $ticket_id, __( 'The ticket was re-opened.', 'wpas' ) );
+
+		/**
+		 * wpas_after_reopen_ticket hook
+		 *
+		 * @since  3.0.2
+		 */
+		do_action( 'wpas_after_reopen_ticket', intval( $ticket_id ), $update );
+
+		return $update;
+
+	} else {
+		return false;
+	}
 
 }

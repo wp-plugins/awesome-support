@@ -82,6 +82,18 @@ class WPAS_Save_Fields extends WPAS_Custom_Fields {
 
 			}
 
+			/* Process the agent (re)attribution differently */
+			if ( 'assignee' === $option['name'] ) {
+
+				/* Don't od anything if the agent didn't change */
+				if ( $_POST[$option_name] == get_post_meta( $post_id, '_wpas_assignee', true ) ) {
+					continue;
+				}
+
+				wpas_assign_ticket( $post_id, $_POST["_$option_name"], $option_args['log'] );
+				continue;
+			}
+
 			/* We handle different option types differently */
 			if ( 'taxonomy' != $option_args['callback'] ):
 
@@ -341,7 +353,7 @@ class WPAS_Save_Fields extends WPAS_Custom_Fields {
 					 * If no value is set for this custom field and it exists in the database
 					 * we delete it to avoid DB overload.
 					 */
-					if ( !empty( $old ) && 'status' !== $field['name'] ) {
+					if ( !empty( $old ) && 'status' !== $field['name'] && 'assignee' !== $field['name'] ) {
 						delete_post_meta( $post_id, "_$field_name", $old );
 					}
 

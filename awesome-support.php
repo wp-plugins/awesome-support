@@ -10,7 +10,7 @@
  * Plugin Name:       Awesome Support
  * Plugin URI:        http://getawesomesupport.com
  * Description:       Awesome Support is a great ticketing system that will help you improve your customer satisfaction by providing a unique customer support experience.
- * Version:           3.0.1
+ * Version:           3.1.0
  * Author:            ThemeAvenue
  * Author URI:        http://themeavenue.net
  * Text Domain:       wpas
@@ -28,7 +28,7 @@ if ( ! defined( 'WPINC' ) ) {
  * Shortcuts
  *----------------------------------------------------------------------------*/
 
-define( 'WPAS_VERSION',           '3.0.1' );
+define( 'WPAS_VERSION',           '3.1.0' );
 define( 'WPAS_DB_VERSION',        '1' );
 define( 'WPAS_URL',               trailingslashit( plugin_dir_url( __FILE__ ) ) );
 define( 'WPAS_PATH',              trailingslashit( plugin_dir_path( __FILE__ ) ) );
@@ -47,7 +47,8 @@ define( 'WPAS_FIELDS_DESC', apply_filters( 'wpas_fields_descriptions', true ) );
  *----------------------------------------------------------------------------*/
 
 require_once( WPAS_PATH . 'includes/functions-fallback.php' );
-require_once( plugin_dir_path( __FILE__ ) . 'class-awesome-support.php' );
+require_once( WPAS_PATH . 'includes/class-logger.php' );
+require_once( WPAS_PATH . 'class-awesome-support.php' );
 
 /**
  * Register hooks that are fired when the plugin is activated or deactivated.
@@ -69,6 +70,7 @@ add_action( 'plugins_loaded', array( 'Awesome_Support', 'get_instance' ) );
  */
 require_once( WPAS_PATH . 'includes/addons/custom-fields/class-custom-fields.php' );
 require_once( WPAS_PATH . 'includes/addons/file-uploader/class-file-uploader.php' );
+require_once( WPAS_PATH . 'includes/addons/class-mailgun-email-check.php' );
 
 /**
  * Call all classes and functions files that are shared
@@ -84,11 +86,30 @@ require_once( WPAS_PATH . 'includes/functions-general.php' );         // Functio
 require_once( WPAS_PATH . 'includes/functions-custom-fields.php' );   // Submission form related functions
 require_once( WPAS_PATH . 'includes/functions-templating.php' );      // Templating function
 require_once( WPAS_PATH . 'includes/class-post-type.php' );           // Register post types and related functions
+require_once( WPAS_PATH . 'includes/class-product-sync.php' );        // Keep the product taxonomy in sync with e-commerce products
+
+/**
+ * Check if dependencies are loaded.
+ *
+ * The plugin uses a certain number of dependencies managed through Composer.
+ * If those dependencies are not loaded the plugin won't work.
+ *
+ * In order to avoid errors we check if dependencies are present. If not we simply
+ * don't load the plugin.
+ *
+ * This problem won't happen with the production version as we have scripts
+ * doing all the work, but on the development verison this can be a problem.
+ *
+ * @since  3.0.2
+ */
+if ( !Awesome_Support::dependencies_loaded() ) {
+	add_action( 'admin_notices', 'wpas_missing_dependencied' );
+}
 
 /*----------------------------------------------------------------------------*
  * Public-Facing Only Functionality
  *----------------------------------------------------------------------------*/
-if( !is_admin() ) {
+if( !is_admin() && Awesome_Support::dependencies_loaded() ) {
 	require_once( WPAS_PATH . 'includes/class-notification.php' ); // Load notifications class
 	require_once( WPAS_PATH . 'includes/shortcodes/shortcode-tickets.php' ); // The plugin main shortcodes
 	require_once( WPAS_PATH . 'includes/shortcodes/shortcode-submit.php' );  // The plugin main shortcode-submit
@@ -101,13 +122,21 @@ if( !is_admin() ) {
 /**
  * The code below is intended to to give the lightest footprint possible.
  */
-if ( is_admin() ) {
+if ( is_admin() && Awesome_Support::dependencies_loaded() ) {
 
 	/* Load main admin class */
 	require_once( WPAS_PATH . 'includes/admin/class-admin.php' );
 	add_action( 'plugins_loaded', array( 'Awesome_Support_Admin', 'get_instance' ) );
 
+	/* Load the MailGun e-mail check settings */
+	add_filter( 'wpas_plugin_settings', array( 'WPAS_MailGun_EMail_Check', 'settings' ), 10, 1 );
+
 }
+
+/*----------------------------------------------------------------------------*
+ * Integrations
+ *----------------------------------------------------------------------------*/
+require_once( WPAS_PATH . 'includes/integrations/loader.php' );
 
 /**
  * Start the session if needed.
