@@ -5,7 +5,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: support,helpdesk,tickets,ticketing,help,support staff,
 Requires at least: 3.5.1
 Tested up to: 4.1
-Stable tag: 3.1.0
+Stable tag: 3.1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -127,6 +127,12 @@ If you don't know how to add new capabilities to a role, I suggest you use a plu
 
 == Changelog ==
 
+= 3.1.1 =
+
+* Do not override custom templates for the ticket details page
+* Send HTML e-mails more reliably
+* Bugfixes
+
 = 3.1.0 =
 
 * Add new filters before registering the post type
@@ -134,6 +140,7 @@ If you don't know how to add new capabilities to a role, I suggest you use a plu
 * Add support for e-commerce plugins when multi-products is enabled (currently supports WooCommerce, Easy Digital Downloads, WP eCommerce and Jigoshop)
 * Ask for a password only once on the registration form
 * Add e-mail verification to the registration form (uses MailGun, free account required)
+* Hide about page from the menu
 * Allow e-mail to be used as the login for clients
 * Improve agent assignment function
 * Re-written and optimized e-mail notification class (with a wrapper function `wpas_email_notify()`)
@@ -145,8 +152,6 @@ If you don't know how to add new capabilities to a role, I suggest you use a plu
 * Fix issue with the blank page after login
 * Fixed some notices on the ticket single page
 * Few bugfixes
-
-* Hide about page from the menu
 
 = 3.0.1 =
 
@@ -161,4 +166,4 @@ If you don't know how to add new capabilities to a role, I suggest you use a plu
 
 == Upgrade Notice ==
 
-This version fixes a few bugs and introduces a lot of new features
+This version fixes a few bugs. If you want to use custom templates for the ticket details page you have to update.
