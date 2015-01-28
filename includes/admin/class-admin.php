@@ -496,7 +496,25 @@ class Awesome_Support_Admin {
 	 */
 	public function filter_ticket_data( $data, $postarr ) {
 
-		if ( isset( $data['post_type'] ) && 'ticket' === $data['post_type'] && isset( $_POST['post_status_override'] ) && !empty( $_POST['post_status_override'] ) ) {
+		global $current_user;
+
+		if ( !isset( $data['post_type'] ) || 'ticket' !== $data['post_type'] ) {
+			return $data;
+		}
+
+		/**
+		 * Automatically set the ticket as processing if this is the first reply.
+		 */
+		if ( user_can( $current_user->ID, 'edit_ticket' ) && isset( $postarr['ID'] ) ) {
+			$replies = wpas_get_replies( intval( $postarr['ID'] ) );
+			if ( 0 === count( $replies ) ) {
+				if ( !isset( $_POST['post_status_override'] ) || 'queued' === $_POST['post_status_override'] ) {
+					$_POST['post_status_override'] = 'processing';
+				}
+			}
+		}
+
+		if ( isset( $_POST['post_status_override'] ) && !empty( $_POST['post_status_override'] ) ) {
 
 			$status = wpas_get_post_status();
 
@@ -853,23 +871,13 @@ class Awesome_Support_Admin {
 				 * Remove the save_post hook now as we're going to trigger
 				 * a new one by inserting the reply (and logging the history later).
 				 */
-				remove_action( 'save_post', array( $this, 'save_ticket' ) );
-
-				/**
-				 * wpas_save_reply_before hook
-				 */
-				do_action( 'wpas_save_reply_before' );
+				remove_action( 'save_post_ticket', array( $this, 'save_ticket' ) );
 
 				/* Insert the reply in DB */
 				$reply = wpas_add_reply( $data, $post_id );
 
 				/* In case the insertion failed... */
 				if ( is_wp_error( $reply ) ) {
-
-					/**
-					 * wpas_save_reply_after_error hook
-					 */
-					do_action( 'wpas_save_reply_after_error', $reply );
 
 					/* Set the redirection */
 					$_SESSION['wpas_redirect'] = add_query_arg( array( 'wpas-message' => 'wpas_reply_error' ), get_permalink( $post_id ) );
@@ -880,11 +888,6 @@ class Awesome_Support_Admin {
 					 * Delete the activity transient.
 					 */
 					delete_transient( "wpas_activity_meta_post_$post_id" );
-
-					/**
-					 * wpas_save_reply_after hook
-					 */
-					do_action( 'wpas_save_reply_after', $reply, $data );
 
 					/* E-Mail the client */
 					$new_reply = new WPAS_Email_Notification( $post_id, array( 'reply_id' => $reply, 'action' => 'reply_agent' ) );
@@ -901,7 +904,7 @@ class Awesome_Support_Admin {
 							do_action( 'wpas_ticket_before_close_by_agent', $post_id );
 
 							/* Close */
-							update_post_meta( $post_id, '_wpas_status', 'closed' );
+							$closed = wpas_close_ticket( $post_id );
 
 							/* Log the action */
 							$log[] = array(
@@ -910,7 +913,6 @@ class Awesome_Support_Admin {
 								'value'    => 'closed',
 								'field_id' => 'status'
 							);
-
 
 							/* E-Mail the client */
 							$ticket_closed = new WPAS_Email_Notification( $post_id, array( 'action' => 'closed' ) );

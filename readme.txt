@@ -5,7 +5,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: support,helpdesk,tickets,ticketing,help,support staff,
 Requires at least: 3.5.1
 Tested up to: 4.1
-Stable tag: 3.1.1
+Stable tag: 3.1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -127,6 +127,14 @@ If you don't know how to add new capabilities to a role, I suggest you use a plu
 
 == Changelog ==
 
+= 3.1.2 =
+
+* Fix issue with first reply being added twice
+* Fix issue with HTML e-mail notifications if multiple notifications are sent by the same instance
+* Use the user display name in the stakeholders metabox
+* Set the ticket as "In Progress" after first reply in a more reliable way
+* Add new hooks
+
 = 3.1.1 =
 
 * Do not override custom templates for the ticket details page
@@ -166,4 +174,8 @@ If you don't know how to add new capabilities to a role, I suggest you use a plu
 
 == Upgrade Notice ==
 
-This version fixes a few bugs. If you want to use custom templates for the ticket details page you have to update.
+Few bugfixes. You should update to fix the issue with first reply being added twice.
+
+== Roadmap ==
+
+Want to know what’s next for Awesome Support? [Check out the roadmap](https://trello.com/b/pHYdtkHc). You can also vote for the ideas you like best!
