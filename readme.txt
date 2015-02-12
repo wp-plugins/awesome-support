@@ -196,3 +196,7 @@ Lots of bugfixes
 == Roadmap ==
 
 Want to know what’s next for Awesome Support? [Check out the roadmap](https://trello.com/b/pHYdtkHc). You can also vote for the ideas you like best!
+
+== Add-Ons ==
+
+Need to extend Awesome Support's features? We have lots of add-ons to help you setup the perfect support site. [Check out our add-ons page](http://getawesomesupport.com/addons/?utm_source=wordpress.org&utm_medium=other-notes&utm_campaign=Extend).
