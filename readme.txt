@@ -1,4 +1,4 @@
-=== Awesome Support ===
+=== Awesome Support - WordPress Support Plugin ===
 
 Contributors: themeavenue,julien731,siamkreative
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=KADEESTQ9H3GW
@@ -127,6 +127,23 @@ If you don't know how to add new capabilities to a role, I suggest you use a plu
 
 == Changelog ==
 
+= 3.1.3 =
+
+* Add Gist oEmbed support
+* Add the `WPAS_DISABLE_AUTO_ASSIGN` to disable auto-assignment
+* Add URL field for custom fields
+* Show login form to non logged-in users on ticket details page
+* Fix compatibility issue with WP Members
+* Fix random agent assignment when re-assigning an open ticket
+* Fix issue with e-mail notifications sent to the wrong agent
+* Only show open tickets when filtering by status
+* Fix bug preventing ticket with no replies from being deleted
+* Don't show the current status when ticket is closed
+* Fix bug with tags not filtering correctly in the admin
+* Correctly load translations
+* Add Select2 for users and tickets dropdowns
+* Do not count trashed posts in the admin menu
+
 = 3.1.2 =
 
 * Fix issue with first reply being added twice
@@ -174,7 +191,7 @@ If you don't know how to add new capabilities to a role, I suggest you use a plu
 
 == Upgrade Notice ==
 
-Few bugfixes. You should update to fix the issue with first reply being added twice.
+Lots of bugfixes
 
 == Roadmap ==
 

@@ -36,6 +36,7 @@ class Awesome_Support {
 		if ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) {
 
 			add_action( 'plugins_loaded',                 array( 'WPAS_Ticket_Post_Type', 'get_instance' ), 11 );
+			add_action( 'plugins_loaded',                 array( 'WPAS_Gist',             'get_instance' ), 11 );
 			add_action( 'pre_user_query',                 'wpas_randomize_uers_query' );                  // Alter the user query to randomize the results
 			add_action( 'wp',                             array( $this, 'get_replies_object' ) );         // Generate the object used for the custom loop for displaying ticket replies
 			add_action( 'wpmu_new_blog',                  array( $this, 'activate_new_site' ) );          // Activate plugin when new blog is added
@@ -47,12 +48,14 @@ class Awesome_Support {
 			add_action( 'template_redirect',              array( $this, 'redirect_archive' ) );
 			add_action( 'wpas_after_registration_fields', array( $this, 'terms_and_conditions_checkbox' ), 10, 3 );// Load the terms and conditions in a hidden div in the footer
 			add_action( 'wpas_after_template',            array( $this, 'terms_and_conditions_modal' ), 10, 3 );// Load the terms and conditions in a hidden div in the footer
+			add_action( 'wpas_after_template',            array( $this, 'credit' ), 10, 3 );
 			add_filter( 'template_include',               array( $this, 'template_include' ), 10, 1 );
 			add_filter( 'wpas_logs_handles',              array( $this, 'default_log_handles' ), 10, 1 );
 			add_filter( 'authenticate',                   array( $this, 'email_signon' ), 20, 3 );
 
 			/* Hook all e-mail notifications */
 			add_action( 'wpas_open_ticket_after',  array( $this, 'notify_confirmation' ), 10, 2 );
+			add_action( 'wpas_ticket_assigned',    array( $this, 'notify_assignment' ), 10, 2 );
 			add_action( 'wpas_add_reply_after',    array( $this, 'notify_reply' ), 10, 2 );
 			add_action( 'wpas_after_close_ticket', array( $this, 'notify_close' ), 10, 1 );
 
@@ -106,7 +109,7 @@ class Awesome_Support {
 		 *
 		 * @since 3.0.0
 		 */
-		if ( isset( $_POST['log'] ) ) {
+		if ( isset( $_POST['wpas_login'] ) ) {
 			add_action( 'wp', 'wpas_try_login' );
 		}
 
@@ -598,7 +601,7 @@ class Awesome_Support {
 	 * @since    1.0.0
 	 */
 	public function load_plugin_textdomain() {
-		load_plugin_textdomain( 'wpas', FALSE, basename( plugin_dir_path( dirname( __FILE__ ) ) ) . '/languages/' );
+		load_plugin_textdomain( 'wpas', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 	}
 
 	/**
@@ -616,10 +619,10 @@ class Awesome_Support {
 
 		if ( ! is_admin() && wpas_is_plugin_page() ) {
 
+			wp_enqueue_style( 'wpas-plugin-styles' );
+
 			if ( file_exists( WPAS_PATH . "themes/$theme/css/style.css" ) && true === boolval( wpas_get_option( 'theme_stylesheet' ) ) ) {
 				wp_enqueue_style( 'wpas-theme-styles' );
-			} else {
-				wp_enqueue_style( 'wpas-plugin-styles' );
 			}
 			
 		}
@@ -700,19 +703,31 @@ class Awesome_Support {
 	}
 
 	/**
-	 * Send e-mail confirmations.
+	 * Send e-mail confirmation.
 	 *
-	 * Sends an e-mail confirmation to the client
-	 * and warns the agent that a new ticket has been assigned.
+	 * Sends an e-mail confirmation to the client.
 	 *
 	 * @since  3.0.0
 	 * @param  integer $ticket_id ID of the new ticket
-	 * @param  integer $agent_id  ID of the agent who's assigned
-	 * @param  array $data        Ticket data
+	 * @param  array   $data      Ticket data
 	 * @return void
 	 */
 	public function notify_confirmation( $ticket_id, $data ) {
-		wpas_email_notify( $ticket_id, array( 'submission_confirmation', 'new_ticket_assigned' ) );
+		wpas_email_notify( $ticket_id, 'submission_confirmation' );
+	}
+
+	/**
+	 * Send e-mail assignment notification.
+	 *
+	 * Sends an e-mail to the agent that a new ticket has been assigned.
+	 *
+	 * @since  3.1.3
+	 * @param  integer $ticket_id ID of the new ticket
+	 * @param  integer $agent_id  ID of the agent who's assigned
+	 * @return void
+	 */
+	public function notify_assignment( $ticket_id, $agent_id ) {
+		wpas_email_notify( $ticket_id, 'new_ticket_assigned' );
 	}
 
 	public function notify_reply( $reply_id, $data ) {
@@ -909,6 +924,16 @@ class Awesome_Support {
 
 		die();
 
+	}
+
+	/**
+	 * Display a link to the plugin page.
+	 *
+	 * @since  3.1.3
+	 * @return void
+	 */
+	public function credit( $name, $template, $args ) {
+		echo '<p class="wpas-credit">Built with Awesome Support,<br> the most versatile <a href="https://wordpress.org/plugins/awesome-support/" target="_blank" title="The best support plugin for WordPress">WordPress Support Plugin</a></p>';
 	}
 
 }

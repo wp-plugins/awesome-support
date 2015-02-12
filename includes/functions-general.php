@@ -131,7 +131,7 @@ function wpas_is_plugin_page() {
 
 		);
 
-		if ( isset( $post ) && isset( $post->post_type ) && 'ticket' === $post->post_type ) {
+		if ( isset( $post ) && isset( $post->post_type ) && in_array( $post->post_type, array( 'ticket', 'wpas_unassigned_mail' ) ) ) {
 			return true;
 		}
 
@@ -333,3 +333,129 @@ function wpas_missing_dependencied() { ?>
         <p><?php printf( __( 'Awesome Support dependencies are missing. The plugin can&#39;t be loaded properly. Please run %s before anything else. If you don&#39;t know what this is you should <a href="%s" class="thickbox">install the production version</a> of this plugin instead.', 'wpas' ), '<a href="https://getcomposer.org/doc/00-intro.md#using-composer" target="_blank"><code>composer install</code></a>', esc_url( add_query_arg( array( 'tab' => 'plugin-information', 'plugin' => 'awesome-support', 'TB_iframe' => 'true', 'width' => '772', 'height' => '935' ), admin_url( 'plugin-install.php' ) ) ) ); ?></p>
     </div>
 <?php }
+
+/**
+ * Wrap element into lis.
+ *
+ * Takes a string and wraps it into a pair
+ * or <li> tags.
+ *
+ * @since  3.1.3
+ * @param  string $entry  The entry to wrap
+ * @return string         The wrapped element
+ */
+function wpas_wrap_li( $entry ) {
+
+	if ( is_array( $entry ) ) {
+		$entry = wpas_array_to_ul( $entry );
+	}
+
+	$entry = htmlentities( $entry );
+
+	return "<li>$entry</li>";
+}
+
+/**
+ * Convert array into an unordered list.
+ *
+ * @since  3.1.3
+ * @param  array $array Array to convert
+ * @return string       Unordered list
+ */
+function wpas_array_to_ul( $array ) {
+	$wrapped = array_map( 'wpas_wrap_li', $array );
+	return '<ul>' . implode( '', $wrapped ) . '</ul>';
+}
+
+/**
+ * Create dropdown of things.
+ *
+ * @since  3.1.3
+ * @param  array $args     Dropdown settings
+ * @param  string $options Dropdown options
+ * @return string          Dropdown with custom options
+ */
+function wpas_dropdown( $args, $options ) {
+
+	$defaults = array(
+		'name'          => 'wpas_user',
+		'id'            => '',
+		'class'         => '',
+		'please_select' => false,
+		'select2'       => false,
+		'disabled'      => false,
+	);
+
+	extract( wp_parse_args( $args, $defaults ) );
+
+	$class = (array) $class;
+
+	if ( true === $select2 ) {
+		array_push( $class, 'wpas-select2' );
+	}
+
+	/* Start the buffer */
+	ob_start(); ?>
+
+	<select name="<?php echo $name; ?>" <?php if ( !empty( $class ) ) echo 'class="' . implode( ' ' , $class ) . '"'; ?> <?php if ( !empty( $id ) ) echo "id='$id'"; ?> <?php if( true === $disabled ) { echo 'disabled'; } ?>>
+		<?php
+		if ( $please_select ) {
+			echo '<option value="">' . __( 'Please select', 'wpas' ) . '</option>';
+		}
+
+		echo $options;
+		?>
+	</select>
+
+	<?php
+	/* Get the buffer contents */
+	$contents = ob_get_contents();
+
+	/* Clean the buffer */
+	ob_end_clean();
+
+	return $contents;
+
+}
+
+/**
+ * Get a dropdown of the tickets.
+ *
+ * @since  3.1.3
+ * @param  array  $args   Dropdown arguments
+ * @param  string $status Specific ticket status to look for
+ * @return void
+ */
+function wpas_tickets_dropdown( $args = array(), $status = '' ) {
+
+	$defaults = array(
+		'name'          => 'wpas_tickets',
+		'id'            => '',
+		'class'         => '',
+		'exclude'       => array(),
+		'selected'      => '',
+		'select2'       => true,
+		'please_select' => false
+	);
+
+	extract( wp_parse_args( $args, $defaults ) );
+
+	/* List all tickets */
+	$tickets = get_tickets( $status );
+	$options = '';
+
+	/**
+	 * We use a marker to keep track of when a user was selected.
+	 * This allows for adding a fallback if nobody was selected.
+	 * 
+	 * @var boolean
+	 */
+	$marker = false;
+
+	foreach ( $tickets as $ticket ) {
+		$options .= "<option value='$ticket->ID'>$ticket->post_title</option>";
+	}
+
+	echo wpas_dropdown( wp_parse_args( $args, $defaults ), $options );
+
+}

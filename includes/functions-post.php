@@ -263,7 +263,7 @@ function get_tickets( $status = 'open', $args = array() ) {
 
 	$defaults = array(
 		'post_type'              => 'ticket',
-		'post_status'            => 'any',
+		'post_status'            => wpas_get_post_status(),
 		'posts_per_page'         => -1,
 		'no_found_rows'          => false,
 		'cache_results'          => true,
@@ -725,6 +725,10 @@ function wpas_get_replies( $post_id, $status = 'any', $args = array() ) {
  * @return integer         ID of the best agent for the job
  */
 function wpas_find_agent( $ticket_id = false ) {
+
+	if ( defined( 'WPAS_DISABLE_AUTO_ASSIGN' ) && true === WPAS_DISABLE_AUTO_ASSIGN ) {
+		return apply_filters( 'wpas_find_available_agent', wpas_get_option( 'assignee_default' ), $ticket_id );
+	}
 
 	$users = get_users( array( 'orderby' => 'wpas_random' ) ); // We use a unique and non-existing orderby parameter so that we can identify the query in pre_user_query
 	$agent = array();

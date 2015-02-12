@@ -56,8 +56,22 @@ function wpas_single_ticket( $content ) {
 	remove_filter( 'the_content', 'wpas_single_ticket' );
 
 	/* Check if the current user can view the ticket */
-	if ( !wpas_can_view_ticket( $post->ID ) ) {
-		return wpas_notification( false, 13, false );
+	if ( ! wpas_can_view_ticket( $post->ID ) ) {
+
+		if ( is_user_logged_in() ) {
+			return wpas_notification( false, 13, false );
+		} else {
+
+			$output = '';
+			$output .= wpas_notification( false, 13, false );
+
+			ob_start();
+			wpas_get_template( 'registration' );
+			$output .= ob_get_clean();
+
+			return $output;
+
+		}
 	}
 
 	/* Get template name */
@@ -661,5 +675,46 @@ function wpas_get_offset_html5() {
 	$offset = "$sign$hours:$minutes";
 
 	return $offset;
+
+}
+
+/**
+ * Display taxonomy terms.
+ *
+ * This function is used to display a taxonomy's terms
+ * and is necessary for non standard taxonomies (such as product).
+ *
+ * @since  3.1.3
+ * @param  string $field    ID of the field to display
+ * @param  integer $post_id ID of the current post
+ * @return void
+ */
+function wpas_show_taxonomy_column( $field, $post_id, $separator = ', ' ) {
+
+	$terms = get_the_terms( $post_id, $field );
+	$list  = array();
+
+	if ( ! is_array( $terms ) ) {
+		echo '';
+	} else {
+
+		foreach ( $terms as $term ) {
+
+			if ( is_admin() ) {
+				$get         = (array) $_GET;
+				$get[$field] = $term->slug;
+				$url         = add_query_arg( $get, admin_url( 'edit.php' ) );
+				$item        = "<a href='$url'>{$term->name}</a>";
+			} else {
+				$item = $term->name;
+			}
+
+			array_push( $list, $item );
+
+		}
+
+		echo implode( $separator, $list );
+
+	}
 
 }

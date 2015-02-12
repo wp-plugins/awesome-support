@@ -530,6 +530,10 @@ class WPAS_Custom_Fields {
 			return;
 		}
 
+		if ( isset( $_GET['post_status'] ) ) {
+			return false;
+		}
+
 		$this_sort       = isset( $_GET['wpas_status'] ) ? $_GET['wpas_status'] : '';
 		$all_selected    = ( '' === $this_sort ) ? 'selected="selected"' : '';
 		$open_selected   = ( 'open' === $this_sort ) ? 'selected="selected"' : '';
@@ -559,28 +563,22 @@ class WPAS_Custom_Fields {
 		global $pagenow;
 
 		/* Check if we are in the correct post type */
-		if( is_admin() && 'edit.php' == $pagenow && isset( $_GET['post_type'] ) && 'ticket' == $_GET['post_type'] && $query->is_main_query() ) {
-
-			/* Get the current query */
-			$qv = &$query->query_vars;
+		if ( is_admin() && 'edit.php' == $pagenow && isset( $_GET['post_type'] ) && 'ticket' === $_GET['post_type'] && $query->is_main_query() ) {
 
 			/* Get all custom fields */
 			$fields = $this->get_custom_fields();
 
 			/* Filter custom fields that are taxonomies */
-			foreach( $fields as $id => $field ) {
+			foreach ( $query->query_vars as $arg => $value ) {
+				if ( array_key_exists( $arg, $fields ) && 'taxonomy' === $fields[$arg]['args']['callback'] && true === $fields[$arg]['args']['filterable'] ) {
 
-				if( 'taxonomy' == $field['args']['callback'] && true === $field['args']['filterable'] ) {
+					$term = get_term_by( 'id', $value, $arg );
 
-					if( isset( $qv[$id] ) && !empty( $qv[$id] ) ) {
-
-						$term    = get_term_by( 'id', $qv[$id], $id );
-						$qv[$id] = $term->slug;
-
+					if ( false !== $term ) {
+						$query->query_vars[$arg] = $term->slug;
 					}
 
 				}
-
 			}
 
 		}
@@ -754,7 +752,7 @@ function wpas_register_core_fields() {
 			'log'                   => true,
 			'callback'              => 'taxonomy',
 			'taxo_std'              => false,
-			'save_callback'         => null,
+			'column_callback'       => 'wpas_show_taxonomy_column',
 			'label'                 => $labels['label'],
 			'name'                  => $labels['name'],
 			'label_plural'          => $labels['label_plural'],

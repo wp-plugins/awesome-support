@@ -97,6 +97,7 @@ class Awesome_Support_Admin {
 
 			/* Do Actions. */
 			add_action( 'pre_get_posts',             array( $this, 'hide_others_tickets' ), 10, 1 );
+			add_action( 'pre_get_posts',             array( $this, 'limit_open' ), 10, 1 );
 			add_action( 'admin_init',                array( $this, 'system_tools' ), 10, 0 );
 			add_action( 'plugins_loaded',            array( $this, 'remote_notifications' ), 15, 0 );
 			add_action( 'admin_enqueue_scripts',     array( $this, 'enqueue_admin_styles' ) );              // Load plugin styles
@@ -203,6 +204,11 @@ class Awesome_Support_Admin {
 			return false;
 		}
 
+		/* Make sure we only alter our post type */
+		if ( ! isset( $_GET['post_type'] ) || 'ticket' !== $_GET['post_type'] ) {
+			return false;
+		}
+
 		/* If admins can see all tickets do nothing */
 		if ( current_user_can( 'administrator' ) && true === boolval( wpas_get_option( 'admin_see_all' ) ) ) {
 			return false;
@@ -228,6 +234,49 @@ class Awesome_Support_Admin {
 	}
 
 	/**
+	 * Limit the list of tickets to open.
+	 *
+	 * When tickets are filtered by post status it makes no sense
+	 * to display tickets that are already closed. We hereby limit
+	 * the list to open tickets.
+	 *
+	 * @since  3.1.3
+	 * @param object WordPress main query
+	 */
+	public function limit_open( $query ) {
+
+		/* Make sure this is the main query */
+		if ( ! $query->is_main_query() ) {
+			return false;
+		}
+
+		/* Make sure this is the admin screen */
+		if ( ! is_admin() ) {
+			return false;
+		}
+
+		/* Make sure we only alter our post type */
+		if ( ! isset( $_GET['post_type'] ) || 'ticket' !== $_GET['post_type'] ) {
+			return false;
+		}
+
+		if ( ! isset( $_GET['post_status'] ) || ! array_key_exists( $_GET['post_status'], wpas_get_post_status() ) ) {
+			return false;
+		}
+
+		$query->set( 'meta_query', array(
+			array(
+				'key'     => '_wpas_status',
+				'value'   => 'open',
+				'compare' => '=',
+			) )
+		);
+
+		return true;
+
+	}
+
+	/**
 	 * Register and enqueue admin-specific style sheet.
 	 *
 	 * @since     1.0.0
@@ -235,9 +284,10 @@ class Awesome_Support_Admin {
 	 */
 	public function enqueue_admin_styles() {
 
-		if ( wpas_is_plugin_page() ) {
-		
-			wp_enqueue_style( 'wpas-admin-styles', WPAS_URL . 'assets/admin/css/admin.css', array(), WPAS_VERSION );
+		if ( wpas_is_plugin_page() ) {		
+
+			wp_enqueue_style( 'wpas-select2', WPAS_URL . 'assets/admin/css/vendor/select2.min.css', null, '3.5.2', 'all' );
+			wp_enqueue_style( 'wpas-admin-styles', WPAS_URL . 'assets/admin/css/admin.css', array( 'wpas-select2' ), WPAS_VERSION );
 
 		}
 
@@ -266,11 +316,8 @@ class Awesome_Support_Admin {
 			wp_enqueue_script( 'wpas-admin-about-script', WPAS_URL . 'assets/admin/js/admin-about.js', array( 'jquery' ), WPAS_VERSION );
 		}
 
-		if ( 'ticket' == get_post_type() && 'edit.php' === $pagenow ) {
-			wp_enqueue_script( 'wpas-admin-edit', WPAS_URL . 'assets/admin/js/admin-edit.js', array( 'jquery' ), WPAS_VERSION, true );
-		}
-
-		wp_enqueue_script( 'wpas-admin-script', WPAS_URL . 'assets/admin/js/admin.js', array( 'jquery' ), WPAS_VERSION );
+		wp_enqueue_script( 'wpas-select2', WPAS_URL . 'assets/admin/js/vendor/select2.min.js', array( 'jquery' ), '3.5.2', true );
+		wp_enqueue_script( 'wpas-admin-script', WPAS_URL . 'assets/admin/js/admin.js', array( 'jquery', 'wpas-select2' ), WPAS_VERSION );
 		wp_localize_script( 'wpas-admin-script', 'wpasL10n', array( 'alertDelete' => __( 'Are you sure you want to delete this reply?', 'wpas' ) ) );
 		wp_enqueue_script( 'wpas-admin-tabletojson', WPAS_URL . 'assets/admin/js/vendor/jquery.tabletojson.min.js', array( 'jquery' ), WPAS_VERSION );
 
@@ -499,6 +546,20 @@ class Awesome_Support_Admin {
 		global $current_user;
 
 		if ( !isset( $data['post_type'] ) || 'ticket' !== $data['post_type'] ) {
+			return $data;
+		}
+
+		/**
+		 * If the ticket is being trashed we don't do anything.
+		 */
+		if ( 'trash' === $data['post_status'] ) {
+			return $data;
+		}
+
+		/**
+		 * Do not affect auto drafts
+		 */
+		if ( 'auto-draft' === $data['post_status'] ) {
 			return $data;
 		}
 
