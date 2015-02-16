@@ -5,7 +5,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: support,helpdesk,tickets,ticketing,help,support staff,
 Requires at least: 3.5.1
 Tested up to: 4.1
-Stable tag: 3.1.3
+Stable tag: 3.1.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -126,6 +126,10 @@ If you don't know how to add new capabilities to a role, I suggest you use a plu
 7. Settings page
 
 == Changelog ==
+
+= 3.1.4 =
+
+* Fix compatibitily issue with WooCommerce
 
 = 3.1.3 =
 
