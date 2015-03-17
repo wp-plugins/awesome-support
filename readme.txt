@@ -5,7 +5,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: support,helpdesk,tickets,ticketing,help,support staff,
 Requires at least: 3.5.1
 Tested up to: 4.1
-Stable tag: 3.1.4
+Stable tag: 3.1.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -126,6 +126,25 @@ If you don't know how to add new capabilities to a role, I suggest you use a plu
 7. Settings page
 
 == Changelog ==
+
+= 3.1.5 - 2015-03-17 =
+
+* Add new filters
+* Add missing textdomains, localize a few forgotten strings, and update translation catalog
+* Add a small API to handle admin notices and dismiss them
+* Show user display name in users dropdowns and admin tickets list
+* Show agent display name in ticket history (back-end)
+* Send a confirmation e-mail to user when agent opens a ticket on his/her behalf
+* Rewrite of the reply edition function in ticket edit screen (back-end) fixing a couple of bugs
+* Fix issue in agent assignment function
+* Fix issue with empty email subject when using Mandrill
+* Fix the issue of settings page not being translated
+* Fix issue with settings page not being reachable when the plugin is translated
+* Fix issue with e-commerce products not saving correctly when multiple products is enabled
+* Fix dates displayed incorrectly on front-end
+* Fix uploads size limit applying on the entire WordPress site
+* Fix "ticket closed" saved twice when replying and closing a ticket at the same time
+* [More details about this update on our blog](http://getawesomesupport.com/bugfixes-3-1-5/)
 
 = 3.1.4 =
 

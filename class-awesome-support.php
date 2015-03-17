@@ -33,31 +33,43 @@ class Awesome_Support {
 		/* Ajax actions */
 		add_action( 'wp_ajax_nopriv_email_validation', array( $this, 'mailgun_check' ) );
 
+		/**
+		 * Load the WP Editor Ajax class.
+		 */
+		add_action( 'plugins_loaded', array( 'WPAS_Editor_Ajax', 'get_instance' ), 11, 0 );
+
 		if ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) {
 
-			add_action( 'plugins_loaded',                 array( 'WPAS_Ticket_Post_Type', 'get_instance' ), 11 );
-			add_action( 'plugins_loaded',                 array( 'WPAS_Gist',             'get_instance' ), 11 );
-			add_action( 'pre_user_query',                 'wpas_randomize_uers_query' );                  // Alter the user query to randomize the results
-			add_action( 'wp',                             array( $this, 'get_replies_object' ) );         // Generate the object used for the custom loop for displaying ticket replies
-			add_action( 'wpmu_new_blog',                  array( $this, 'activate_new_site' ) );          // Activate plugin when new blog is added
-			add_action( 'init',                           array( $this, 'load_plugin_textdomain' ) );     // Load the plugin textdomain
-			add_action( 'init',                           array( $this, 'init' ), 11, 0 );                // Register main post type
-			add_action( 'admin_bar_menu',                 array( $this, 'toolbar_tickets_link' ), 999 );  // Add a link to agent's tickets in the toolbar
-			add_action( 'wp_print_styles',                array( $this, 'enqueue_styles' ) );             // Load public-facing style sheets
-			add_action( 'wp_print_scripts',               array( $this, 'enqueue_scripts' ) );            // Load public-facing JavaScripts
-			add_action( 'template_redirect',              array( $this, 'redirect_archive' ) );
-			add_action( 'wpas_after_registration_fields', array( $this, 'terms_and_conditions_checkbox' ), 10, 3 );// Load the terms and conditions in a hidden div in the footer
-			add_action( 'wpas_after_template',            array( $this, 'terms_and_conditions_modal' ), 10, 3 );// Load the terms and conditions in a hidden div in the footer
-			add_action( 'wpas_after_template',            array( $this, 'credit' ), 10, 3 );
-			add_filter( 'template_include',               array( $this, 'template_include' ), 10, 1 );
-			add_filter( 'wpas_logs_handles',              array( $this, 'default_log_handles' ), 10, 1 );
-			add_filter( 'authenticate',                   array( $this, 'email_signon' ), 20, 3 );
+			/**
+			 * Load external classes.
+			 */
+			add_action( 'plugins_loaded',                 array( 'WPAS_Ticket_Post_Type', 'get_instance' ),  11, 0 );
+			add_action( 'plugins_loaded',                 array( 'WPAS_Gist',             'get_instance' ),  11, 0 );
+			add_action( 'pre_user_query',                 'wpas_randomize_uers_query',                       10, 1 ); // Alter the user query to randomize the results
+
+			/**
+			 * Load internal methods.
+			 */
+			add_action( 'wp',                             array( $this, 'get_replies_object' ),              10, 0 ); // Generate the object used for the custom loop for displaying ticket replies
+			add_action( 'wpmu_new_blog',                  array( $this, 'activate_new_site' ),               10, 0 ); // Activate plugin when new blog is added
+			add_action( 'plugins_loaded',                 array( $this, 'load_plugin_textdomain' ),           9, 0 ); // Load the plugin textdomain
+			add_action( 'init',                           array( $this, 'init' ),                            11, 0 ); // Register main post type
+			add_action( 'admin_bar_menu',                 array( $this, 'toolbar_tickets_link' ),           999, 1 ); // Add a link to agent's tickets in the toolbar
+			add_action( 'wp_print_styles',                array( $this, 'enqueue_styles' ),                  10, 0 ); // Load public-facing style sheets
+			add_action( 'wp_print_scripts',               array( $this, 'enqueue_scripts' ),                 10, 0 ); // Load public-facing JavaScripts
+			add_action( 'template_redirect',              array( $this, 'redirect_archive' ),                10, 0 );
+			add_action( 'wpas_after_registration_fields', array( $this, 'terms_and_conditions_checkbox' ),   10, 3 ); // Add terms & conditions checkbox
+			add_action( 'wpas_after_template',            array( $this, 'terms_and_conditions_modal' ),      10, 3 ); // Load the terms and conditions in a hidden div in the footer
+			add_action( 'wpas_after_template',            array( $this, 'credit' ),                          10, 3 );
+			add_filter( 'template_include',               array( $this, 'template_include' ),                10, 1 );
+			add_filter( 'wpas_logs_handles',              array( $this, 'default_log_handles' ),             10, 1 );
+			add_filter( 'authenticate',                   array( $this, 'email_signon' ),                    20, 3 );
 
 			/* Hook all e-mail notifications */
 			add_action( 'wpas_open_ticket_after',  array( $this, 'notify_confirmation' ), 10, 2 );
-			add_action( 'wpas_ticket_assigned',    array( $this, 'notify_assignment' ), 10, 2 );
-			add_action( 'wpas_add_reply_after',    array( $this, 'notify_reply' ), 10, 2 );
-			add_action( 'wpas_after_close_ticket', array( $this, 'notify_close' ), 10, 1 );
+			add_action( 'wpas_ticket_assigned',    array( $this, 'notify_assignment' ),   10, 2 );
+			add_action( 'wpas_add_reply_after',    array( $this, 'notify_reply' ),        10, 2 );
+			add_action( 'wpas_after_close_ticket', array( $this, 'notify_close' ),        10, 1 );
 
 			/**
 			 * Modify the ticket single page content.
@@ -601,7 +613,37 @@ class Awesome_Support {
 	 * @since    1.0.0
 	 */
 	public function load_plugin_textdomain() {
+
+		global $locale;
+
+		/**
+		 * Custom locale.
+		 *
+		 * The custom locale defined by the URL var $wpas_locale
+		 * is used for debugging purpose. It makes testing language
+		 * files easily without changing the site main language.
+		 * It can also be useful when doing support on a site that's
+		 * not in English.
+		 *
+		 * @since  3.1.5
+		 * @var    string
+		 */
+		$wpas_locale = filter_input( INPUT_GET, 'wpas_locale', FILTER_SANITIZE_STRING );
+
+		if ( ! empty( $wpas_locale ) ) {
+			$backup = $locale;
+			$locale = $wpas_locale;
+		}
+
 		load_plugin_textdomain( 'wpas', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+
+		/**
+		 * Reset the $locale after loading our language file
+		 */
+		if ( ! empty( $wpas_locale ) ) {
+			$locale = $backup;
+		}
+
 	}
 
 	/**
@@ -682,7 +724,7 @@ class Awesome_Support {
 
 		if ( isset( $wp_query->post ) && 'ticket' === $wp_query->post->post_type ) {
 
-			$args = array(
+			$args = apply_filters( 'wpas_replies_object_args', array(
 				'post_parent'            => $wp_query->post->ID,
 				'post_type'              => 'ticket_reply',
 				'post_status'            => array( 'read', 'unread' ),
@@ -694,7 +736,7 @@ class Awesome_Support {
 				'update_post_term_cache' => false,
 				'update_post_meta_cache' => false,
 				
-			);
+			) );
 
 			$wpas_replies = new WP_Query( $args );
 

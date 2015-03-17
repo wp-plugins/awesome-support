@@ -59,6 +59,7 @@ class Awesome_Support_Admin {
 			/* Load admin functions files */
 			require_once( WPAS_PATH . 'includes/admin/functions-admin.php' );
 			require_once( WPAS_PATH . 'includes/admin/functions-tools.php' );
+			require_once( WPAS_PATH . 'includes/admin/functions-notices.php' );
 			require_once( WPAS_PATH . 'includes/admin/class-admin-tickets-list.php' );
 			require_once( WPAS_PATH . 'includes/admin/class-admin-user.php' );
 			require_once( WPAS_PATH . 'includes/admin/class-admin-titan.php' );
@@ -179,6 +180,22 @@ class Awesome_Support_Admin {
 		}
 
 		return self::$instance;
+	}
+
+	/**
+	 * Add a link to the settings page.
+	 *
+	 * @since  3.1.5
+	 * @param  array $links Plugin links
+	 * @return array        Links with the settings
+	 */
+	public static function settings_page_link( $links ) {
+
+		$link    = add_query_arg( array( 'post_type' => 'ticket', 'page' => 'settings' ), admin_url( 'edit.php' ) );
+		$links[] = "<a href='$link'>" . __( 'Settings', 'wpas' ) . "</a>";
+
+		return $links;
+
 	}
 
 	/**
@@ -584,7 +601,7 @@ class Awesome_Support_Admin {
 				$data['post_status'] = $_POST['post_status_override'];
 
 				if ( $postarr['original_post_status'] !== $_POST['post_status_override'] && isset( $_POST['wpas_post_parent'] ) ) {
-					wpas_log( intval( $_POST['wpas_post_parent'] ), sprintf( __( 'Ticket state changed to %s'), '&laquo;' . $status[$_POST['post_status_override']] . '&raquo;' ) );
+					wpas_log( intval( $_POST['wpas_post_parent'] ), sprintf( __( 'Ticket state changed to %s', 'wpas' ), '&laquo;' . $status[$_POST['post_status_override']] . '&raquo;' ) );
 				}
 			}
 
@@ -904,9 +921,25 @@ class Awesome_Support_Admin {
 		 */
 		$log = array();
 
-		/* First thing, set the ticket as open */
+		/**
+		 * If no ticket status is found we are in the situation where
+		 * the agent is creating a ticket on behalf of the user. There are
+		 * a couple of things that we need to do then.
+		 */
 		if ( '' === $original_status = get_post_meta( $post_id, '_wpas_status', true ) ) {
+
+			/**
+			 * First of all, set the ticket as open. This is very important.
+			 */
 			add_post_meta( $post_id, '_wpas_status', 'open', true );
+
+			/**
+			 * Send the confirmation e-mail to the user.
+			 *
+			 * @since  3.1.5
+			 */
+			wpas_email_notify( $post_id, 'submission_confirmation' );
+
 		}
 
 		/* Save the possible ticket reply */
@@ -966,14 +999,6 @@ class Awesome_Support_Admin {
 
 							/* Close */
 							$closed = wpas_close_ticket( $post_id );
-
-							/* Log the action */
-							$log[] = array(
-								'action'   => 'updated',
-								'label'    => __( 'Status', 'wpas' ),
-								'value'    => 'closed',
-								'field_id' => 'status'
-							);
 
 							/* E-Mail the client */
 							$ticket_closed = new WPAS_Email_Notification( $post_id, array( 'action' => 'closed' ) );

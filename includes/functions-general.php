@@ -33,6 +33,17 @@ function wpas_nonce_url( $url ) {
 }
 
 /**
+ * Check a custom action nonce.
+ *
+ * @since  3.1.5
+ * @param  string $nonce  Nonce to be checked
+ * @return boolean        Nonce validity
+ */
+function wpas_check_nonce( $nonce ) {
+	return wp_verify_nonce( $nonce, 'wpas_custom_action' );
+}
+
+/**
  * Add custom action and nonce to URL.
  *
  * The function adds a custom action trigger using the wpas-do
@@ -262,6 +273,46 @@ function wpas_get_ticket_status( $post_id = null ) {
 
 }
 
+/**
+ * Get the ticket state.
+ *
+ * Gets the ticket status. If the ticket is closed nothing fancy.
+ * If not, we return the ticket state instead of the "Open" status.
+ *
+ * @since  3.1.5
+ * @param  integer $post_id Post ID
+ * @return string           Ticket status / state
+ */
+function wpas_get_ticket_status_state( $post_id ) {
+
+	$status = wpas_get_ticket_status( $post_id );
+
+	if ( 'closed' === $status ) {
+		$output = __( 'Closed', 'wpas' );
+	} else {
+
+		$post          = get_post( $post_id );
+		$post_status   = $post->post_status;
+		$custom_status = wpas_get_post_status();
+
+		if ( ! array_key_exists( $post_status, $custom_status ) ) {
+			$output = __( 'Open', 'wpas' );
+		} else {
+
+			$defaults = array(
+				'queued'     => '#1e73be',
+				'processing' => '#a01497',
+				'hold'       => '#b56629'
+			);
+
+			$output = $custom_status[$post_status];
+		}
+	}
+
+	return $output;
+
+}
+
 function wpas_get_current_admin_url() {
 
 	global $pagenow;
@@ -470,5 +521,49 @@ function wpas_tickets_dropdown( $args = array(), $status = '' ) {
 	}
 
 	echo wpas_dropdown( wp_parse_args( $args, $defaults ), $options );
+
+}
+
+add_filter( 'locale','wpas_change_locale', 10, 1 );
+/**
+ * Change the site's locale.
+ *
+ * This is used for debugging purpose. This function
+ * allows for changing the locale during WordPress
+ * initialization. This will only affect the current user.
+ *
+ * @since  3.1.5
+ * @param  string $locale Site locale
+ * @return string         Possibly modified locale
+ */
+function wpas_change_locale( $locale ) {
+
+   $wpas_locale = filter_input( INPUT_GET, 'wpas_lang', FILTER_SANITIZE_STRING );
+
+	if ( ! empty( $wpas_locale ) ) {
+		$backup = $locale;
+		$locale = $wpas_locale;
+	}
+
+	return $locale;
+}
+
+/**
+ * Get plugin settings page URL.
+ *
+ * @since  3.1.5
+ * @param  string $tab Tab ID
+ * @return string      URL to the required settings page
+ */
+function wpas_get_settings_page_url( $tab = '' ) {
+
+	$admin_url  = admin_url( 'edit.php' );
+	$query_args = array( 'post_type' => 'ticket', 'page' => 'settings' );
+
+	if ( ! empty( $tab ) ) {
+		$query_args['tab'] = sanitize_text_field( $tab );
+	}
+
+	return add_query_arg( $query_args, $admin_url );
 
 }

@@ -123,6 +123,39 @@ class WPAS_Custom_Fields_Display extends WPAS_Custom_Fields {
 	<?php }
 
 	/**
+	 * Textarea field.
+	 */
+	public static function textarea( $field ) {
+
+		if ( isset( $post ) ) {
+			$post_id = $post->ID;
+		} elseif ( isset( $_GET['post'] ) ) {
+			$post_id = intval( $_GET['post'] );
+		} else {
+			$post_id = false;
+		}
+
+		$field_id    = 'wpas_' . $field['name'];
+		$value       = wpas_get_cf_value( $field_id, $post_id );
+		$label       = wpas_get_field_title( $field );
+		$field_class = isset( $field['args']['field_class'] ) ? $field['args']['field_class'] : ''; ?>
+
+		<div <?php wpas_get_field_container_class( $field_id ); ?> id="<?php echo $field_id; ?>_container">
+			
+			<label for="<?php echo $field_id; ?>"><strong><?php echo $label; ?></strong></label>
+
+			<?php if ( !is_admin() || current_user_can( $field['args']['capability'] ) ): ?>
+				<textarea id="<?php echo $field_id; ?>" <?php wpas_get_field_class( $field_id, $field_class ); ?> name="<?php echo $field_id; ?>" <?php if ( true === $field['args']['required'] ): ?>required<?php endif; ?>><?php echo $value; ?></textarea>
+			<?php else: ?>
+				<p id="<?php echo $field_id; ?>"><?php echo $value; ?></p>
+			<?php endif;
+
+			if( isset( $field['args']['desc'] ) && '' != $field['args']['desc'] && WPAS_FIELDS_DESC ): ?><p class="<?php echo is_admin() ? 'description' : 'wpas-help-block'; ?>"><?php echo wp_kses_post( $field['args']['desc'] ); ?></p><?php endif; ?>
+		</div>
+
+	<?php }
+
+	/**
 	 * "Fake" taxonomy select.
 	 * 
 	 * @param  array $field Field options
@@ -199,7 +232,7 @@ function wpas_cf_display_status( $name, $post_id ) {
 	$status = wpas_get_ticket_status( $post_id );
 
 	if ( 'closed' === $status ) {
-		$label  = ucwords( $status );
+		$label  = __( 'Closed', 'wpas' );
 		$color  = wpas_get_option( "color_$status", '#dd3333' );
 		$tag    = "<span class='wpas-label' style='background-color:$color;'>$label</span>";
 	} else {
@@ -209,7 +242,7 @@ function wpas_cf_display_status( $name, $post_id ) {
 		$custom_status = wpas_get_post_status();
 
 		if ( !array_key_exists( $post_status, $custom_status ) ) {
-			$label  = ucwords( $status );
+			$label  = __( 'Open', 'wpas' );
 			$color  = wpas_get_option( "color_$status", '#169baa' );
 			$tag    = "<span class='wpas-label' style='background-color:$color;'>$label</span>";
 		} else {
@@ -285,7 +318,7 @@ function wpas_hierarchical_taxonomy_dropdown_options( $term, $value, $level = 1 
 	$option .= $term->name;
 	?>
 
-	<option value="<?php echo $term->slug; ?>" <?php if( $term->slug == $value ) { echo 'selected="selected"'; } ?>><?php echo $option; ?></option>
+	<option value="<?php echo $term->term_id; ?>" <?php if( (int) $value === $term->term_id || $value === $term->slug  ) { echo 'selected="selected"'; } ?>><?php echo $option; ?></option>
 
 	<?php if ( isset( $term->children ) && !empty( $term->children ) ) {
 		++$level;

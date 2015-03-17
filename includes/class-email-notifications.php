@@ -593,9 +593,9 @@ class WPAS_Email_Notification {
 		$headers = array(
 			"MIME-Version: 1.0",
 			"Content-type: text/html; charset=utf-8",
-			"From: {$from_name} <{$from_email}>",
-			"Reply-To: {$reply_name} <{$reply_email}>",
-			"Subject: {$subject}",
+			"From: $from_name <$from_email>",
+			"Reply-To: $reply_name <$reply_email>",
+			// "Subject: $subject",
 			"X-Mailer: Awesome Support/" . WPAS_VERSION,
 		);
 
@@ -611,7 +611,7 @@ class WPAS_Email_Notification {
 			)
 		);
 
-		$mail = wp_mail( $email['recipient_email'], $email['subject'], $email['body'], implode( "\r\n", $email['headers'] ) );
+		$mail = wp_mail( $email['recipient_email'], $email['subject'], $email['body'], $email['headers'] );
 
 		return $mail;
 

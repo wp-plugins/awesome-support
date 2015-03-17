@@ -10,7 +10,7 @@
  * Plugin Name:       Awesome Support
  * Plugin URI:        http://getawesomesupport.com
  * Description:       Awesome Support is a great ticketing system that will help you improve your customer satisfaction by providing a unique customer support experience.
- * Version:           3.1.4
+ * Version:           3.1.5
  * Author:            ThemeAvenue
  * Author URI:        http://themeavenue.net
  * Text Domain:       wpas
@@ -28,7 +28,7 @@ if ( ! defined( 'WPINC' ) ) {
  * Shortcuts
  *----------------------------------------------------------------------------*/
 
-define( 'WPAS_VERSION',           '3.1.4' );
+define( 'WPAS_VERSION',           '3.1.5' );
 define( 'WPAS_DB_VERSION',        '1' );
 define( 'WPAS_URL',               trailingslashit( plugin_dir_url( __FILE__ ) ) );
 define( 'WPAS_PATH',              trailingslashit( plugin_dir_path( __FILE__ ) ) );
@@ -41,6 +41,18 @@ define( 'WPAS_ADMIN_ASSETS_PATH', trailingslashit( plugin_dir_path( __FILE__ ) .
  *----------------------------------------------------------------------------*/
 
 define( 'WPAS_FIELDS_DESC', apply_filters( 'wpas_fields_descriptions', true ) );
+
+/*----------------------------------------------------------------------------*
+ * Addons
+ *----------------------------------------------------------------------------*/
+
+/**
+ * Array of addons to load.
+ *
+ * @since  3.1.5
+ * @var    array
+ */
+$wpas_addons = array();
 
 /*----------------------------------------------------------------------------*
  * Shared Functionalities
@@ -80,6 +92,7 @@ require_once( WPAS_PATH . 'includes/addons/class-mailgun-email-check.php' );
  */
 require_once( WPAS_PATH . 'includes/functions-post.php' );            // All the functions related to opening a ticket and submitting replies
 require_once( WPAS_PATH . 'includes/functions-user.php' );            // Everything related to user login, registration and capabilities
+require_once( WPAS_PATH . 'includes/functions-addons.php' );          // Addons functions and autoloader
 require_once( WPAS_PATH . 'includes/class-log-history.php' );         // Logging class
 require_once( WPAS_PATH . 'includes/class-email-notifications.php' ); // E-mail notification class
 require_once( WPAS_PATH . 'includes/functions-general.php' );         // Functions that are used both in back-end and front-end
@@ -88,6 +101,7 @@ require_once( WPAS_PATH . 'includes/functions-templating.php' );      // Templat
 require_once( WPAS_PATH . 'includes/class-post-type.php' );           // Register post types and related functions
 require_once( WPAS_PATH . 'includes/class-product-sync.php' );        // Keep the product taxonomy in sync with e-commerce products
 require_once( WPAS_PATH . 'includes/class-gist.php' );                // Add oEmbed support for Gists
+require_once( WPAS_PATH . 'includes/class-wpas-editor-ajax.php' );    // Helper class to load a wp_editor instance via Ajax
 
 /**
  * Check if dependencies are loaded.
@@ -131,6 +145,11 @@ if ( is_admin() && Awesome_Support::dependencies_loaded() ) {
 
 	/* Load the MailGun e-mail check settings */
 	add_filter( 'wpas_plugin_settings', array( 'WPAS_MailGun_EMail_Check', 'settings' ), 10, 1 );
+
+	/**
+	 * Add link ot settings tab
+	 */
+	add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( 'Awesome_Support_Admin', 'settings_page_link' ) );
 
 }
 

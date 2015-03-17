@@ -254,21 +254,38 @@ class WPAS_Save_Fields extends WPAS_Custom_Fields {
 				 * that's what we want. Hence, we loop through the possible multiple terms (which
 				 * shouldn't happen) and only keep the last one.
 				 */
-				foreach ( $terms as $term ) {
-					$the_term = $term->slug;
+				if ( is_array( $terms ) ) {
+					foreach ( $terms as $term ) {
+						$the_term = $term->term_id;
+					}
+				} else {
+					$the_term = '';
 				}
 
 				/* Finally we save the new terms if changed */
-				if ( $the_term !== $value ) {
+				if ( $the_term !== (int) $value ) {
 
-					wp_set_object_terms( $post_id, $value, $taxonomy, false );
+					$term = get_term_by( 'id', (int) $value, $taxonomy );
+
+					if ( false === $term ) {
+						continue;
+					}
+
+					/**
+					 * Apply the get_term filters.
+					 * 
+					 * @var object
+					 */
+					$term = get_term( $term, $taxonomy );
+
+					wp_set_object_terms( $post_id, (int) $value, $taxonomy, false );
 
 					/* Log the action */
 					if ( true === $option_args['log'] ) {
 						$log[] = array(
 							'action'   => 'updated',
 							'label'    => wpas_get_field_title( $option ),
-							'value'    => $value,
+							'value'    => $term->name,
 							'field_id' => $option['name']
 						);
 					}
@@ -389,7 +406,7 @@ class WPAS_Save_Fields extends WPAS_Custom_Fields {
 					}
 
 					foreach ( $terms as $term ) {
-						if ( $term->slug === $_POST[$field_name] ) {
+						if ( $term->term_id === (int) $_POST[$field_name] ) {
 							$term_id = $term->term_id;
 						}
 					}
@@ -399,7 +416,7 @@ class WPAS_Save_Fields extends WPAS_Custom_Fields {
 						continue;
 					}
 
-					wp_set_object_terms( $post_id, $value, $field['name'], false );
+					wp_set_object_terms( $post_id, (int) $value, $field['name'], false );
 
 				}
 
