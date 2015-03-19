@@ -357,7 +357,7 @@ class WPAS_Product_Sync {
 		}
 
 		/* Save the term data as a post meta in order to be able to play with it from the post */
-		add_post_meta( $post->ID, '_wpas_product_term', $term, true );
+		update_post_meta( $post->ID, '_wpas_product_term', $term );
 
 		return $term;
 
@@ -462,7 +462,7 @@ class WPAS_Product_Sync {
 			}
 
 			if ( empty( $query->posts ) ) {
-				return array();
+				return $terms;
 			}
 
 			/* This is the terms object array */

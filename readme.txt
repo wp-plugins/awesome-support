@@ -1,11 +1,11 @@
 === Awesome Support - WordPress Support Plugin ===
 
-Contributors: themeavenue,julien731,siamkreative
+Contributors: themeavenue,julien731,SiamKreative
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=KADEESTQ9H3GW
 Tags: support,helpdesk,tickets,ticketing,help,support staff,
 Requires at least: 3.5.1
 Tested up to: 4.1
-Stable tag: 3.1.5
+Stable tag: 3.1.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -51,6 +51,12 @@ Packed with features, once activated Awesome Support is ready to give you world-
 = Roadmap =
 
 Want to know what’s next for Awesome Support? [Check out the roadmap](https://trello.com/b/pHYdtkHc). You can also vote for the ideas you like best!
+
+= Translations =
+
+* Croatian (100%) - [Sanjin Barac](https://www.transifex.com/accounts/profile/4enter/)
+
+You want to translate Awesome Support in your language? [Head over to the Transifex project](https://www.transifex.com/projects/p/awesome-support/)!
 
 == Installation ==
 
@@ -126,6 +132,14 @@ If you don't know how to add new capabilities to a role, I suggest you use a plu
 7. Settings page
 
 == Changelog ==
+
+= 3.1.6 - 2015-03-19 =
+
+* Add Croatian translation
+* Correctly format the terms & conditions modal box content
+* Load custom theme stylesheet if plugin's theme was customized
+* Set the default theme
+* Fix broken URL redirect after deleting a reply
 
 = 3.1.5 - 2015-03-17 =
 
