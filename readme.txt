@@ -13,6 +13,8 @@ The most advanced support plugin for WordPress. Provide awesome support straight
 
 == Description ==
 
+https://www.youtube.com/watch?v=IdSOWQI3tWU
+
 Awesome Support is the most advanced support plugin for WordPress. It is the result of two years of work, research, and improvement. Most of its features are an answer to user requests for a helpdesk and that's what makes it the best support plugin for WordPress.
 
 For support please visit the [official site](http://getawesomesupport.com).
