@@ -57,6 +57,7 @@ Want to know what’s next for Awesome Support? [Check out the roadmap](https://
 = Translations =
 
 * Croatian (100%) - [Sanjin Barac](https://www.transifex.com/accounts/profile/4enter/)
+* Polish (100%) - [Borys Żmuda](https://www.transifex.com/accounts/profile/rudashi/)
 
 You want to translate Awesome Support in your language? [Head over to the Transifex project](https://www.transifex.com/projects/p/awesome-support/)!
 
@@ -239,3 +240,7 @@ Want to know what’s next for Awesome Support? [Check out the roadmap](https://
 == Add-Ons ==
 
 Need to extend Awesome Support's features? We have lots of add-ons to help you setup the perfect support site. [Check out our add-ons page](http://getawesomesupport.com/addons/?utm_source=wordpress.org&utm_medium=other-notes&utm_campaign=Extend).
+
+== Team ==
+
+Even though the plugin has been developed and is maintained by ThemeAvenue, we've had help from various developers around the world. You can see all the contributors on the [team page](http://getawesomesupport.com/team/). Many thanks to them all!
