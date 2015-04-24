@@ -48,7 +48,12 @@ Check out all of the awesome, user-friendly features of this plugin:
 
 = Extensions =
 
-Packed with features, once activated Awesome Support is ready to give you world-class support.  If you want to go even further though, we've got you covered: dozens of add-ons will allow you to extend the plugin's possibilities and gain even more productivity. To check out the available add-ons please visit the official site [getawesomesupport.com](http://getawesomesupport.com).
+Packed with features, once activated Awesome Support is ready to give you world-class support.  If you want to go even further though, we've got you covered: dozens of add-ons will allow you to extend the plugin's possibilities and gain even more productivity. To check out the available add-ons please visit the official site [getawesomesupport.com](http://getawesomesupport.com?utm_source=wordpress.org&utm_medium=readme&utm_campaign=Extend).
+
+**Popular extensions**
+
+* [E-Mail Piping](http://getawesomesupport.com/addons/email-support/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=Extend) - Reply to tickets by e-mail
+* [WooCommerce](http://getawesomesupport.com/addons/woocommerce/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=Extend) - The bridge between your WooCommerce store and Awesome Support
 
 = Roadmap =
 
@@ -123,6 +128,14 @@ If you don't know how to add new capabilities to a role, I suggest you use a plu
 - `attach_files`
 
 **Do not give your users more than those 5 capabilities**, otherwise they could get administrative privileges.
+
+= How to disable agent auto-assignment =
+
+If you need to disable the auto-assignment function and hence have all new tickets assigned to the default agent (set in the plugin general settings), you can add this constant in your theme's `functions.php` file:
+
+`
+define( 'WPAS_DISABLE_AUTO_ASSIGN', true );
+`
 
 == Screenshots ==
 
@@ -239,8 +252,8 @@ Want to know what’s next for Awesome Support? [Check out the roadmap](https://
 
 == Add-Ons ==
 
-Need to extend Awesome Support's features? We have lots of add-ons to help you setup the perfect support site. [Check out our add-ons page](http://getawesomesupport.com/addons/?utm_source=wordpress.org&utm_medium=other-notes&utm_campaign=Extend).
+Need to extend Awesome Support's features? We have lots of add-ons to help you setup the perfect support site. [Check out our add-ons page](http://getawesomesupport.com/addons/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=Extend).
 
 == Team ==
 
-Even though the plugin has been developed and is maintained by ThemeAvenue, we've had help from various developers around the world. You can see all the contributors on the [team page](http://getawesomesupport.com/team/). Many thanks to them all!
+Even though the plugin has been developed and is maintained by ThemeAvenue, we've had help from various developers around the world. You can see all the contributors on the [team page](http://getawesomesupport.com/team/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=Extend). Many thanks to them all!
