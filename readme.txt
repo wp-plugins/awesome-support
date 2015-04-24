@@ -54,6 +54,7 @@ Packed with features, once activated Awesome Support is ready to give you world-
 
 * [E-Mail Piping](http://getawesomesupport.com/addons/email-support/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=Extend) - Reply to tickets by e-mail
 * [WooCommerce](http://getawesomesupport.com/addons/woocommerce/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=Extend) - The bridge between your WooCommerce store and Awesome Support
+* [Canned Responses](http://getawesomesupport.com/addons/canned-responses/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=Extend) - Write common replies in one click
 
 = Roadmap =
 
