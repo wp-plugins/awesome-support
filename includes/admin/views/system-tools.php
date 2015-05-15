@@ -15,10 +15,15 @@
  *
  * @since  3.0.0
  * @param  string $tool Tool to trigger
+ * @param  array  $args Arbitrary arguments
  * @return string       URL that triggers the tool function
  */
-function wpas_tool_link( $tool ) {
-	return esc_url( add_query_arg( array( 'tool' => $tool, '_nonce' => wp_create_nonce( 'system_tool' ) ), admin_url( 'edit.php' ) ) );
+function wpas_tool_link( $tool, $args = array() ) {
+
+	$args['tool']   = $tool;
+	$args['_nonce'] = wp_create_nonce( 'system_tool' );
+
+	return esc_url( add_query_arg( $args, admin_url( 'edit.php' ) ) );
 }
 
 if ( isset( $_GET['done'] ) ) {
@@ -33,6 +38,13 @@ if ( isset( $_GET['done'] ) ) {
 			$message = __( 'All custom taxonomies terms were cleared', 'wpas' );
 			break;
 
+		case 'resync_products':
+			$message = __( 'All products have been re-synchronized', 'wpas' );
+			break;
+
+		case 'delete_products':
+			$message = __( 'All products have been deleted', 'wpas' );
+			break;
 	}
 
 }
@@ -64,5 +76,6 @@ if ( isset( $message ) ) {
 				<span class="wpas-system-tools-desc"><?php _e( 'Clear all terms from all custom taxonomies.', 'wpas' ); ?></span>
 			</td>
 		</tr>
+		<?php do_action( 'wpas_system_tools_table_after' ); ?>
 	</tbody>
 </table>

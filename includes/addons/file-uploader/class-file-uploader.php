@@ -1,6 +1,6 @@
 <?php
 /**
- * Awesome Support File Uplaoder.
+ * Awesome Support File Uploader.
  *
  * @package   Awesome_Support
  * @author    Julien Liabeuf <julien@liabeuf.fr>
@@ -116,7 +116,10 @@ class WPAS_File_Upload {
 	 * separate WordPress uploads and tickets attachments.
 	 *
 	 * @since  3.0.0
-	 * @param  array $upload [description]
+	 *
+	 * @param  array $upload Initial upload directory
+	 *
+	 * @return string Upload directory
 	 */
 	public function set_upload_dir( $upload ) {
 
@@ -138,7 +141,7 @@ class WPAS_File_Upload {
 
 		}
 
-		if ( !$this->can_attach_files() ) {
+		if ( ! $this->can_attach_files() ) {
 			return $upload;
 		}
 
@@ -157,7 +160,56 @@ class WPAS_File_Upload {
 		$upload['url']     = $url;
 		$upload['subdir']  = $subdir;
 
+		/* Create the directory if it doesn't exist yet, make sure it's protected otherwise */
+		if ( ! is_dir( $dir ) ) {
+			$this->create_upload_dir( $dir );
+		} else {
+			$this->protect_upload_dir( $dir );
+		}
+
 		return $upload;
+
+	}
+
+	/**
+	 * Create the upload directory for a ticket.
+	 *
+	 * @since 3.1.7
+	 *
+	 * @param string $dir Upload directory
+	 *
+	 * @return boolean Whether or not the directory was created
+	 */
+	public function create_upload_dir( $dir ) {
+
+		$make = mkdir( $dir );
+
+		if ( true === $make ) {
+			$this->protect_upload_dir( $dir );
+		}
+
+		return $make;
+
+	}
+
+	/**
+	 * Protects an upload directory by adding an .htaccess file
+	 *
+	 * @since 3.1.7
+	 *
+	 * @param string $dir Upload directory
+	 *
+	 * @return void
+	 */
+	protected function protect_upload_dir( $dir ) {
+
+		$filename = $dir . '/.htaccess';
+
+		if ( ! file_exists( $filename ) ) {
+			$file = fopen( $filename, 'a+' );
+			fwrite( $file, 'Options -Indexes' );
+			fclose( $file );
+		}
 
 	}
 
@@ -267,7 +319,7 @@ class WPAS_File_Upload {
 		} ?>
 
 		<div class="wpas-reply-attachements">
-			<strong><?php _e( 'Attachements:', 'wpas' ); ?></strong>
+			<strong><?php _e( 'Attachments:', 'wpas' ); ?></strong>
 			<ul>
 				<?php
 				foreach ( $attachments as $attachment_id => $attachment ):

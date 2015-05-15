@@ -65,7 +65,7 @@ class WPAS_Product_Sync {
 
 	/**
 	 * Defines if this class completely replaces the taxonomy terms
-	 * or just appens new ones to it.
+	 * or just appends new ones to it.
 	 *
 	 * @since  3.0.2
 	 * @var boolean
@@ -88,6 +88,19 @@ class WPAS_Product_Sync {
 
 		/* Only hack into the taxonomies functions if multiple products is enabled and the provided post type exists */
 		if ( $this->is_multiple_products() && post_type_exists( $post_type ) ) {
+
+			/**
+			 * We need to run an initial synchronization of products
+			 * for large products lists. The get_terms used in the taxonomy page
+			 * only queries 10 terms per page, which means that only hte first 10 items
+			 * will be synced
+			 */
+			$sync_init = get_option( "wpas_sync_$this->post_type" );
+
+			if ( false === $sync_init ) {
+				$this->run_initial_sync();
+			}
+
 			add_filter( 'get_terms',     array( $this, 'get_terms' ),          1, 3 );
 			add_filter( 'get_term',      array( $this, 'get_term' ),           1, 2 );
 			add_filter( 'get_the_terms', array( $this, 'get_the_terms' ),      1, 3 );
@@ -95,8 +108,24 @@ class WPAS_Product_Sync {
 			add_action( 'admin_notices', array( $this, 'notice_locked_tax' ), 10, 0 );
 			add_action( 'trashed_post',  array( $this, 'unsync_term' ),       10, 1 );
 			add_action( 'delete_post',   array( $this, 'unsync_term' ),       10, 1 );
+			add_action( 'wpas_system_tools_table_after', array( $this, 'add_resync_tool' ), 10, 0 );
+			add_action( 'wpas_system_tools_table_after', array( $this, 'add_delete_tool' ), 10, 0 );
+
 		}
 
+	}
+
+	/**
+	 * Set the post type after instantiating the class.
+	 *
+	 * @param $post_type string Post type ID to set
+	 *
+	 * @since 3.1.7
+	 */
+	public function set_post_type( $post_type ) {
+		if ( post_type_exists( $post_type ) ) {
+			$this->post_type = $post_type;
+		}
 	}
 
 	/**
@@ -275,13 +304,15 @@ class WPAS_Product_Sync {
 	 * taxonomy term object.
 	 *
 	 * @since  3.0.2
+	 *
 	 * @param  object $post Post
-	 * @return object       Taxonomy term object
+	 *
+	 * @return boolean|object Taxonomy term object
 	 */
 	protected function create_term_object( $post ) {
 
 		/* If the $post is not an object we return false to avoid triggering PHP errors */
-		if ( !is_object( $post ) ) {
+		if ( ! is_object( $post ) ) {
 			return false;
 		}
 
@@ -298,7 +329,7 @@ class WPAS_Product_Sync {
 
 			$term_data = $this->insert_term( $post );
 
-			/* If the term couldn't be insterted we return false, which will result in skipping this post */
+			/* If the term couldn't be inserted we return false, which will result in skipping this post */
 			if ( false === $term_data ) {
 				return false;
 			}
@@ -364,18 +395,18 @@ class WPAS_Product_Sync {
 	}
 
 	/**
-	 * Prevent a term from being insterted.
+	 * Prevent a term from being inserted.
 	 *
 	 * The wp_insert_term() function calls get_terms()
 	 * which created an infinite loop. To prevent this,
-	 * we add a transient while a term is begin insterted
+	 * we add a transient while a term is begin inserted
 	 * and remove it after the term was inserted.
 	 *
 	 * If this transient is present while a new instance of get_posts()
 	 * is running we do not trigger the term insertion method.
 	 *
 	 * @since  3.0.2
-	 * @param  integer $post_id ID of the post for wich a placeholder term is being insterted
+	 * @param  integer $post_id ID of the post for which a placeholder term is being inserted
 	 * @return void
 	 */
 	public function protect_insert( $post_id ) {
@@ -386,7 +417,7 @@ class WPAS_Product_Sync {
 	 * Remove the protection transient.
 	 *
 	 * @since  3.0.2
-	 * @param  integer $post_id ID of the post for wich a placeholder term was insterted
+	 * @param  integer $post_id ID of the post for which a placeholder term was inserted
 	 * @return void
 	 */
 	public function unprotect_insert( $post_id ) {
@@ -400,7 +431,7 @@ class WPAS_Product_Sync {
 	 * protected for nested insertion.
 	 *
 	 * @since  3.0.2
-	 * @param  integer  $post_id ID of the post for wich a placeholder term is being insterted
+	 * @param  integer  $post_id ID of the post for which a placeholder term is being inserted
 	 * @return boolean           True if the term is protected, false otherwise
 	 */
 	public function is_insert_protected( $post_id ) {
@@ -420,7 +451,7 @@ class WPAS_Product_Sync {
 	 *
 	 * @since  3.0.2
 	 * @param  array         $terms      Taxonomy terms
-	 * @param  array|string  $taxonomies Taxonomies for wich to retrieve the terms
+	 * @param  array|string  $taxonomies Taxonomies for which to retrieve the terms
 	 * @param  array         $args       Additional arguments
 	 * @return array                     Array of term objects
 	 */
@@ -433,11 +464,11 @@ class WPAS_Product_Sync {
 
 		foreach ( $taxonomies as $taxonomy ) {
 
-			if ( !$this->is_product_tax( $taxonomy ) ) {
+			if ( ! $this->is_product_tax( $taxonomy ) ) {
 				return $terms;
 			}
 
-			/* Map the tax arge to the WP_Query args */
+			/* Map the tax args to the WP_Query args */
 			$query_args = $this->map_args( $args );
 
 			$query_defaults = array(
@@ -457,6 +488,10 @@ class WPAS_Product_Sync {
 			$query_args = wp_parse_args( $query_args, $query_defaults );
 			$query      = new WP_Query( $query_args );
 
+			if ( false === get_option( "wpas_sync_$this->post_type", false ) ) {
+				$this->run_initial_sync();
+			}
+
 			if ( isset( $query_args['wpas_get_post_count'] ) && $query_args['wpas_get_post_count'] ) {
 				return $this->append ? $query->post_count + count( $terms ) : $query->post_count;
 			}
@@ -470,7 +505,7 @@ class WPAS_Product_Sync {
 
 			if ( $this->append ) {
 				foreach ( $terms as $term ) {
-					if ( is_object( $term ) && !$this->is_synced_term( $term->term_id ) ) {
+					if ( is_object( $term ) && ! $this->is_synced_term( $term->term_id ) ) {
 						$new_terms[] = $term;
 					}
 				}
@@ -479,14 +514,14 @@ class WPAS_Product_Sync {
 			/* Create the term object for each post */
 			foreach ( $query->posts as $key => $post ) {
 
-				if ( !is_a( $post, 'WP_Post' ) ) {
+				if ( ! is_a( $post, 'WP_Post' ) ) {
 					continue;
 				}
 
 				/* Create the term object */
 				$term = $this->create_term_object( $post );
 
-				/* If an error occured during the insertion of the placeholder term we do not display this one */
+				/* If an error occurred during the insertion of the placeholder term we do not display this one */
 				if ( false === $term ) {
 					continue;
 				}
@@ -519,7 +554,7 @@ class WPAS_Product_Sync {
 			return $term;
 		}
 
-		if ( !$this->is_synced_term( $term->term_id ) ) {
+		if ( ! $this->is_synced_term( $term->term_id ) ) {
 			return $term;
 		}
 
@@ -582,7 +617,7 @@ class WPAS_Product_Sync {
 	 * and the taxonomy in sync.
 	 * @since  3.0.2
 	 * @param  integer        $post_id ID of the post that's being deleted
-	 * @return boolean|object          True if term was deleted, false is nothing happened and WP_Error if an error occured
+	 * @return boolean|object          True if term was deleted, false is nothing happened and WP_Error if an error occurred
 	 */
 	public function unsync_term( $post_id ) {
 
@@ -592,7 +627,11 @@ class WPAS_Product_Sync {
 			$term = get_post_meta( $post_id, '_wpas_product_term', true );
 
 			/* Delete the term */
-			$delete = wp_delete_term( intval( $term['term_id'] ), $this->taxonomy, $args );
+			$delete = wp_delete_term( (int) $term['term_id'], $this->taxonomy );
+
+			if ( true === $delete ) {
+				delete_post_meta( $post_id, '_wpas_product_term' );
+			}
 
 			return $delete;
 		}
@@ -615,7 +654,7 @@ class WPAS_Product_Sync {
 			return false;
 		}
 
-		if ( !isset( $_GET['tag_ID'] ) ) {
+		if ( ! isset( $_GET['tag_ID'] ) ) {
 			return false;
 		}
 
@@ -624,7 +663,7 @@ class WPAS_Product_Sync {
 		$query         = $wpdb->prepare( "SELECT * FROM $wpdb->term_taxonomy WHERE term_id = '%d'", $term_id );
 		$term_taxonomy = $wpdb->get_col( $query, 2 );
 
-		if ( !is_array( $term_taxonomy ) || !isset( $term_taxonomy[0] ) ) {
+		if ( ! is_array( $term_taxonomy ) || ! isset( $term_taxonomy[0] ) ) {
 			return false;
 		}
 
@@ -660,13 +699,13 @@ class WPAS_Product_Sync {
 		$query     = $wpdb->prepare( "SELECT * FROM $wpdb->terms WHERE term_id = '%d'", $term_id );
 		$term_name = $wpdb->get_col( $query, 1 );
 
-		if ( !is_array( $term_name ) || !isset( $term_name[0] ) ) {
+		if ( ! is_array( $term_name ) || ! isset( $term_name[0] ) ) {
 			return false;
 		}
 
 		$term_name = $term_name[0];
 
-		if ( !is_numeric( $term_name ) ) {
+		if ( ! is_numeric( $term_name ) ) {
 			return false;
 		}
 
@@ -756,5 +795,87 @@ class WPAS_Product_Sync {
 		}
 
 	}
+
+	/**
+	 * Runs the initial synchronization of products.
+	 *
+	 * @since 3.1.7
+	 * @return integer The number of terms synchronized
+	 */
+	public function run_initial_sync() {
+
+		$args = array(
+			'post_type'              => $this->post_type,
+			'post_status'            => 'any',
+			'order'                  => 'ASC',
+			'orderby'                => 'title',
+			'ignore_sticky_posts'    => false,
+			'posts_per_page'         => -1,
+			'perm'                   => 'readable',
+			'no_found_rows'          => false,
+			'cache_results'          => true,
+			'update_post_term_cache' => false,
+			'update_post_meta_cache' => false,
+		);
+
+		$query = new WP_Query( $args );
+		$count = 0;
+
+		/* Create the term object for each post */
+		foreach ( $query->posts as $key => $post ) {
+
+			if ( ! is_a( $post, 'WP_Post' ) ) {
+				continue;
+			}
+
+			/* Create the term object */
+			$term = $this->create_term_object( $post );
+
+			/* If the term was successfully created we increment our counter */
+			if ( false !== $term ) {
+				++$count;
+			}
+
+		}
+
+		add_option( "wpas_sync_$this->post_type", $count );
+
+		return $count;
+
+	}
+
+	/**
+	 * Adds a button to re-sync the products in the system tools.
+	 *
+	 * @since 3.1.7
+	 */
+	public function add_resync_tool() { ?>
+		<tr>
+			<td class="row-title"><label for="tablecell"><?php _e( 'Re-Synchronize Products', 'wpas' ); ?></label></td>
+			<td>
+				<a href="<?php echo wpas_tool_link( 'resync_products', array( 'pt' => $this->post_type ) ); ?>"
+				   class="button-secondary"><?php _e( 'Resync', 'wpas' ); ?></a>
+				<span
+					class="wpas-system-tools-desc"><?php _e( 'Re-synchronize all products from your e-commerce plugin.', 'wpas' ); ?></span>
+			</td>
+		</tr>
+	<?php }
+
+	/**
+	 * Adds a button to delete the products in the system tools.
+	 *
+	 * @since 3.1.7
+	 */
+	public function add_delete_tool() { ?>
+		<tr>
+			<td class="row-title"><label for="tablecell"><?php _e( 'Delete Products', 'wpas' ); ?></label></td>
+			<td>
+				<a href="<?php echo wpas_tool_link( 'delete_products', array( 'pt' => $this->post_type ) ); ?>"
+				   class="button-secondary"><?php _e( 'Delete', 'wpas' ); ?></a>
+				<span
+					class="wpas-system-tools-desc"><?php _e( 'Delete all products synchronized from your e-commerce plugin.', 'wpas' ); ?></span>
+			</td>
+		</tr>
+	<?php }
 
 }

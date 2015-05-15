@@ -17,7 +17,7 @@
  * When a submission is valid, the session is destroyed.
  * 
  * @param  string $field_name The name of the field to get the value for
- * @return strgin             The temporary value for this field
+ * @return string             The temporary value for this field
  * @since  3.0.0
  */
 function wpas_get_field_value( $field_name ) {
@@ -93,7 +93,7 @@ function wpas_get_field_class( $field_name = false, $extra = '', $echo = true ) 
  *
  * @since  3.0.0
  * @param  array  $terms    List of terms attached to the post
- * @param  object $taxonomy Taxonomy ot update
+ * @param  object $taxonomy Taxonomy of update
  * @return void
  */
 function wpas_update_ticket_tag_terms_count( $terms, $taxonomy ) {
@@ -110,8 +110,9 @@ function wpas_update_ticket_tag_terms_count( $terms, $taxonomy ) {
 		}
 	}
 
-	foreach ( $object_types as &$object_type )
+	foreach ( $object_types as &$object_type ) {
 		list( $object_type ) = explode( ':', $object_type );
+	}
 
 	$object_types = array_unique( $object_types );
 
@@ -120,18 +121,21 @@ function wpas_update_ticket_tag_terms_count( $terms, $taxonomy ) {
 		$check_attachments = true;
 	}
 
-	if ( $object_types )
+	if ( $object_types ) {
 		$object_types = esc_sql( array_filter( $object_types, 'post_type_exists' ) );
+	}
 
 	foreach ( (array) $terms as $term ) {
 		$count = 0;
 
 		// Attachments can be 'inherit' status, we need to base count off the parent's status if so
-		if ( $check_attachments )
+		if ( $check_attachments ) {
 			$count += (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->term_relationships, $wpdb->posts p1 WHERE p1.ID = $wpdb->term_relationships.object_id AND ( post_status = 'publish' OR ( post_status = 'inherit' AND post_parent > 0 AND ( SELECT post_status FROM $wpdb->posts WHERE ID = p1.post_parent ) = 'publish' ) ) AND post_type = 'attachment' AND term_taxonomy_id = %d", $term ) );
+		}
 
-		if ( $object_types )
-			$count += (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->term_relationships, $wpdb->posts WHERE $wpdb->posts.ID = $wpdb->term_relationships.object_id AND post_status IN ('" . implode( "', '", $allowed_status ) . "') AND post_type IN ('" . implode("', '", $object_types ) . "') AND term_taxonomy_id = %d", $term ) );
+		if ( $object_types ) {
+			$count += (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->term_relationships, $wpdb->posts WHERE $wpdb->posts.ID = $wpdb->term_relationships.object_id AND post_status IN ('" . implode( "', '", $allowed_status ) . "') AND post_type IN ('" . implode( "', '", $object_types ) . "') AND term_taxonomy_id = %d", $term ) );
+		}
 
 		/** This action is documented in wp-includes/taxonomy.php */
 		do_action( 'edit_term_taxonomy', $term, $taxonomy );

@@ -79,7 +79,7 @@ class WPAS_Custom_Fields_Display extends WPAS_Custom_Fields {
 			<label for="<?php echo $field_id; ?>"><strong><?php echo $label; ?></strong></label>
 
 			<?php if ( !is_admin() || current_user_can( $field['args']['capability'] ) ): ?>
-				<input type="text" id="<?php echo $field_id; ?>" <?php wpas_get_field_class( $field_id, $field_class ); ?> name="<?php echo $field_id; ?>" value="<?php echo $value; ?>" <?php if ( true === $field['args']['required'] ): ?>required<?php endif; ?>>
+				<input type="text" id="<?php echo $field_id; ?>" <?php wpas_get_field_class( $field_id, $field_class ); ?> name="<?php echo $field_id; ?>" value="<?php echo $value; ?>" <?php if ( $field['args']['placeholder'] !== '' ): ?>placeholder="<?php echo $field['args']['placeholder'];?>"<?php endif; ?> <?php if ( true === $field['args']['required'] ): ?>required<?php endif; ?>>
 			<?php else: ?>
 				<p id="<?php echo $field_id; ?>"><?php echo $value; ?></p>
 			<?php endif;
@@ -112,7 +112,7 @@ class WPAS_Custom_Fields_Display extends WPAS_Custom_Fields {
 			<label for="<?php echo $field_id; ?>"><strong><?php echo $label; ?></strong></label>
 
 			<?php if ( !is_admin() || current_user_can( $field['args']['capability'] ) ): ?>
-				<input type="url" id="<?php echo $field_id; ?>" <?php wpas_get_field_class( $field_id, $field_class ); ?> name="<?php echo $field_id; ?>" value="<?php echo $value; ?>" <?php if ( true === $field['args']['required'] ): ?>required<?php endif; ?>>
+				<input type="url" id="<?php echo $field_id; ?>" <?php wpas_get_field_class( $field_id, $field_class ); ?> name="<?php echo $field_id; ?>" value="<?php echo $value; ?>" <?php if ( $field['args']['placeholder'] !== '' ): ?>placeholder="<?php echo $field['args']['placeholder'];?>"<?php endif; ?> <?php if ( true === $field['args']['required'] ): ?>required<?php endif; ?>>
 			<?php else: ?>
 				<p id="<?php echo $field_id; ?>"><?php echo $value; ?></p>
 			<?php endif;
@@ -145,7 +145,7 @@ class WPAS_Custom_Fields_Display extends WPAS_Custom_Fields {
 			<label for="<?php echo $field_id; ?>"><strong><?php echo $label; ?></strong></label>
 
 			<?php if ( !is_admin() || current_user_can( $field['args']['capability'] ) ): ?>
-				<textarea id="<?php echo $field_id; ?>" <?php wpas_get_field_class( $field_id, $field_class ); ?> name="<?php echo $field_id; ?>" <?php if ( true === $field['args']['required'] ): ?>required<?php endif; ?>><?php echo $value; ?></textarea>
+				<textarea id="<?php echo $field_id; ?>" <?php wpas_get_field_class( $field_id, $field_class ); ?> name="<?php echo $field_id; ?>" <?php if ( $field['args']['placeholder'] !== '' ): ?>placeholder="<?php echo $field['args']['placeholder'];?>"<?php endif; ?> <?php if ( true === $field['args']['required'] ): ?>required<?php endif; ?>><?php echo $value; ?></textarea>
 			<?php else: ?>
 				<p id="<?php echo $field_id; ?>"><?php echo $value; ?></p>
 			<?php endif;
@@ -191,12 +191,12 @@ class WPAS_Custom_Fields_Display extends WPAS_Custom_Fields {
 		wpas_sort_terms_hierarchicaly( $terms, $ordered_terms );
 		?>
 
-		<div id="<?php echo $field_id; ?>_container" <?php wpas_get_field_container_class( $field_id ); ?>>
+		<div <?php wpas_get_field_container_class( $field_id ); ?> id="<?php echo $field_id; ?>_container">
 			<label for="<?php echo $field_id; ?>"><strong><?php echo $label; ?></strong></label>
 
 			<?php if ( !is_admin() || current_user_can( $field['args']['capability'] ) ): ?>
 
-				<select name="<?php echo $field_id; ?>" id="<?php echo $field_id; ?>" <?php wpas_get_field_class( $field_id ); ?> style="width:100%">
+				<select name="<?php echo $field_id; ?>" id="<?php echo $field_id; ?>" <?php wpas_get_field_class( $field_id ); ?>>
 					<option value=""><?php _e( 'Please select', 'wpas' ); ?></option>
 
 					<?php

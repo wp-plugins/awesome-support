@@ -20,16 +20,29 @@ class WPAS_Tickets_List {
 	protected static $instance = null;
 
 	public function __construct() {
+		add_action( 'manage_ticket_posts_columns',       array( $this, 'add_core_custom_columns' ),     16, 1 );
+		add_action( 'manage_ticket_posts_custom_column', array( $this, 'core_custom_columns_content' ), 10, 2 );
+		add_action( 'restrict_manage_posts',             array( $this, 'unreplied_filter' ),             9, 0 );
+		add_action( 'admin_menu',                        array( $this, 'hide_closed_tickets' ),         10, 0 );
+		add_filter( 'the_excerpt',                       array( $this, 'remove_excerpt' ),              10, 1 );
+		add_filter( 'post_row_actions',                  array( $this, 'remove_quick_edit' ),           10, 2 );
+		// add_filter( 'views_edit-ticket',                                array( $this, 'test' ),                        10, 1 );
 		// add_action( 'quick_edit_custom_box',                            array( $this, 'custom_quickedit_options' ), 10, 2 );
 		// add_action( 'bulk_edit_custom_box',                             array( $this, 'custom_quickedit_options' ), 10, 2 );
 		// add_action( 'wp_ajax_save_bulk_edit_book',                      array( $this, 'save_bulk_edit_ticket' ), 10, 0 );
-		add_action( 'manage_ticket_posts_columns',        array( $this, 'add_core_custom_columns' ), 16, 1 );
-		add_action( 'manage_ticket_posts_custom_column' , array( $this, 'core_custom_columns_content' ), 10, 2 );
-		add_action( 'restrict_manage_posts',                            array( $this, 'unreplied_filter' ), 9, 0 );
-		add_action( 'admin_menu',                                       array( $this, 'hide_closed_tickets' ) );
-		add_filter( 'the_excerpt',                                      array( $this, 'remove_excerpt' ) );
 		// add_filter( 'update_user_metadata',                             array( $this, 'set_list_mode' ), 10, 5 );
 		// add_filter( 'parse_query',                                      array( $this, 'filter_by_replies' ), 10, 1 );
+	}
+
+	public function test( $views ) {
+
+		global $wp_query;
+
+		print_r( wp_count_posts( 'ticket' ) );
+
+//		print_r( $wp_query );
+
+		return $views;
 	}
 
 	/**
@@ -47,7 +60,24 @@ class WPAS_Tickets_List {
 
 		return self::$instance;
 	}
+        
+        /**
+         * Remove Quick Edit action
+         * 
+         * @since   3.1.6
+         * @global  object  $post
+	 * @param   array   $actions    An array of row action links.
+         * @return  array               Updated array of row action links
+         */
+        public function remove_quick_edit( $actions ) {
+            global $post;
 
+            if( $post->post_type === 'ticket' ) {
+                unset($actions['inline hide-if-no-js']);
+            }
+            return $actions;
+        }
+        
 	/**
 	 * Add age custom column.
 	 *
@@ -65,6 +95,10 @@ class WPAS_Tickets_List {
 		 * Parse the old columns and add the new ones.
 		 */
 		foreach ( $columns as $col_id => $col_label ) {
+
+			if ( 'title' === $col_id ) {
+				$new['ticket_id'] = '#';
+			}
 
 			/* Remove the date column that's replaced by the activity column */
 			if ( 'date' !== $col_id ) {
@@ -102,13 +136,20 @@ class WPAS_Tickets_List {
 
 		switch ( $column ) {
 
+			case 'ticket_id':
+
+				$link = add_query_arg( array( 'post' => $post_id, 'action' => 'edit' ), admin_url( 'post.php' ) );
+				echo "<a href='$link'>#$post_id</a>";
+
+				break;
+
 			case 'wpas-assignee':
 
 				$assignee = get_post_meta( $post_id, '_wpas_assignee', true );
 				$agent    = get_user_by( 'id', $assignee );
 				echo $agent->data->display_name;
 
-			break;
+				break;
 
 			case 'wpas-activity':
 
@@ -158,7 +199,7 @@ class WPAS_Tickets_List {
 
 					/**
 					 * We check when was the last reply (if there was a reply).
-					 * Then, we compute the ticket age and if it is considered as 
+					 * Then, we compute the ticket age and if it is considered as
 					 * old, we display an informational tag.
 					 */
 					if ( !isset( $activity_meta['reply_date'] ) ) {
@@ -171,19 +212,21 @@ class WPAS_Tickets_List {
 							'post_parent'            => $post_id,
 							'post_type'              => 'ticket_reply',
 							'post_status'            => array( 'unread', 'read' ),
-							'posts_per_page'         => -1,
+							'posts_per_page'         => - 1,
+							'orderby'                => 'date',
+							'order'                  => 'DESC',
 							'no_found_rows'          => true,
 							'cache_results'          => false,
 							'update_post_term_cache' => false,
-							'update_post_meta_cache' => false,	
+							'update_post_meta_cache' => false,
 						);
-					
+
 						$query = new WP_Query( $args );
 						$role  = true === user_can( $activity_meta['user_id'], 'edit_ticket' ) ? _x( 'agent', 'User role', 'wpas' ) : _x( 'client', 'User role', 'wpas' );
 
 						?><li><?php echo _x( sprintf( _n( '%s reply.', '%s replies.', $query->post_count, 'wpas' ), $query->post_count ), 'Number of replies to a ticket', 'wpas' ); ?></li><?php
-						?><li><?php printf( _x( 'Last replied %s ago by %s (%s).', 'Last reply ago', 'wpas' ), human_time_diff( strtotime( $activity_meta['reply_date'] ), current_time( 'timestamp' ) ), '<a href="' . $activity_meta['user_link'] . '">' . $activity_meta['user_nicename'] . '</a>', $role ); ?></li><?php
-						?><li><?php //printf( _x( 'Last replied by %s.', 'Last reply author', 'wpas' ), '<a href="' . $activity_meta['user_link'] . '">' . $activity_meta['user_nicename'] . '</a>' ); ?></li><?php	
+						?><li><?php printf( _x( '<a href="%s">Last replied</a> %s ago by %s (%s).', 'Last reply ago', 'wpas' ), add_query_arg( array( 'post' => $post_id, 'action' => 'edit' ), admin_url( 'post.php' ) ) . '#wpas-post-' . $query->posts[0]->ID, human_time_diff( strtotime( $activity_meta['reply_date'] ), current_time( 'timestamp' ) ), '<a href="' . $activity_meta['user_link'] . '">' . $activity_meta['user_nicename'] . '</a>', $role ); ?></li><?php
+						?><li><?php //printf( _x( 'Last replied by %s.', 'Last reply author', 'wpas' ), '<a href="' . $activity_meta['user_link'] . '">' . $activity_meta['user_nicename'] . '</a>' ); ?></li><?php
 					}
 
 				endif;
@@ -195,7 +238,7 @@ class WPAS_Tickets_List {
 					$color = ( false !== ( $c = wpas_get_option( 'color_awaiting_reply', false ) ) ) ? $c : '#0074a2';
 					array_push( $tags, "<span class='wpas-label' style='background-color:$color;'>" . __( 'Awaiting Support Reply', 'wpas' ) . "</span>" );
 				}
-				
+
 
 				if ( true === wpas_is_ticket_old( $post_id, $latest ) ) {
 					$old_color = wpas_get_option( 'color_old' );
@@ -208,7 +251,7 @@ class WPAS_Tickets_List {
 
 				echo '</ul>';
 
-			break;
+				break;
 
 		}
 
@@ -220,9 +263,9 @@ class WPAS_Tickets_List {
 	 * Add options to change ticket state and status in the quick edit box.
 	 *
 	 * @since  3.0.0
-	 * @param  [type] $column_name [description]
-	 * @param  [type] $post_type   [description]
-	 * @return [type]              [description]
+	 * @param  array $column_name ID of the current column
+	 * @param  string $post_type  Post type
+	 * @return void
 	 */
 	public function custom_quickedit_options( $column_name, $post_type ) {
 
@@ -232,8 +275,7 @@ class WPAS_Tickets_List {
 
 		if ( 'status' === $column_name ):
 
-			$custom_status = wpas_get_post_status();
-			$status        = wpas_get_ticket_status(); ?>
+			$custom_status = wpas_get_post_status(); ?>
 
 			<fieldset class="inline-edit-col-right inline-edit-ticket">
 				<div class="inline-edit-col column-<?php echo $column_name ?>">
@@ -264,7 +306,7 @@ class WPAS_Tickets_List {
 		<?php endif;
 	}
 
-	public function save_bulk_edit_ticket() { print_r( $_POST ); exit;
+	public function save_bulk_edit_ticket() {
 
 		// TODO perform nonce checking
 		// get our variables
@@ -330,21 +372,19 @@ class WPAS_Tickets_List {
 	 * @return void
 	 */
 	public function hide_closed_tickets() {
+            $hide = boolval( wpas_get_option( 'hide_closed' ) );
 
-		$hide = boolval( wpas_get_option( 'hide_closed' ) );
+            if ( true !== $hide ) {
+                    return false;
+            }
 
-		if ( true !== $hide ) {
-			return false;
-		}
+            global $submenu;
 
-		global $submenu;
+            if ( is_array( $submenu ) && array_key_exists( 'edit.php?post_type=ticket', $submenu ) && isset($submenu[5])) {
+                    $submenu["edit.php?post_type=ticket"][5][2] = $submenu["edit.php?post_type=ticket"][5][2] . '&amp;wpas_status=open';
+            }
 
-		if ( is_array( $submenu ) && array_key_exists( 'edit.php?post_type=ticket', $submenu ) ) {
-			$submenu["edit.php?post_type=ticket"][5][2] = $submenu["edit.php?post_type=ticket"][5][2] . '&amp;wpas_status=open';
-		}
-
-		return true;
-
+            return true;
 	}
 
 	/**
@@ -356,7 +396,7 @@ class WPAS_Tickets_List {
 	 * @since  3.0.0
 	 * @param  object $query WordPress current main query
 	 */
-	function filter_by_replies( $query ) {
+	public function filter_by_replies( $query ) {
 
 		global $pagenow;
 

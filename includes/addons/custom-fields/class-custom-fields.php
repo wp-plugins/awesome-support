@@ -28,7 +28,7 @@ class WPAS_Custom_Fields {
 		add_action( 'init', array( $this, 'register_taxonomies' ) );
 
 		/**
-		 * Instanciate the class that handles saving the custom fields.
+		 * Instantiate the class that handles saving the custom fields.
 		 */
 		$wpas_save = new WPAS_Save_Fields();
 
@@ -167,11 +167,11 @@ class WPAS_Custom_Fields {
 					'search_items'      => sprintf( __( 'Search %s', 'wpas' ), $plural ),
 					'all_items'         => sprintf( __( 'All %s', 'wpas' ), $plural ),
 					'parent_item'       => sprintf( __( 'Parent %s', 'wpas' ), $name ),
-					'parent_item_colon' => sprintf( __( 'Parent %s:', 'wpas' ), $name ),
+					'parent_item_colon' => sprintf( _x( 'Parent %s:', 'Parent term in a taxonomy where %s is dynamically replaced by the taxonomy (eg. "book")', 'wpas' ), $name ),
 					'edit_item'         => sprintf( __( 'Edit %s', 'wpas' ), $name ),
 					'update_item'       => sprintf( __( 'Update %s', 'wpas' ), $name ),
 					'add_new_item'      => sprintf( __( 'Add New %s', 'wpas' ), $name ),
-					'new_item_name'     => sprintf( __( 'New %s Name', 'wpas' ), $name ),
+					'new_item_name'     => sprintf( _x( 'New %s Name', 'A new taxonomy term name where %s is dynamically replaced by the taxonomy (eg. "book")', 'wpas' ), $name ),
 					'menu_name'         => $plural,
 				);
 
@@ -238,7 +238,7 @@ class WPAS_Custom_Fields {
 	 *
 	 * If there are registered custom fields, the method returns true.
 	 * Core fields are not considered registered custom fields by default
-	 * but that can be overrided with the $core parameter.
+	 * but that can be overridden with the $core parameter.
 	 *
 	 * @since  3.0.0
 	 * @param  boolean $core True if core fields should be counted as registered custom fields.
@@ -689,7 +689,8 @@ function wpas_add_custom_taxonomy( $name, $args = array() ) {
 		return false;
 
 	/* Force the custom fields type to be a taxonomy. */
-	$args['callback'] = 'taxonomy';
+	$args['callback']        = 'taxonomy';
+	$args['column_callback'] = 'wpas_show_taxonomy_column';
 
 	/* Add the taxonomy. */
 	$wpas_cf->add_field( $name, $args );

@@ -38,6 +38,11 @@ class Awesome_Support {
 		 */
 		add_action( 'plugins_loaded', array( 'WPAS_Editor_Ajax', 'get_instance' ), 11, 0 );
 
+		/**
+		 * Load plugin integrations
+		 */
+		require_once( WPAS_PATH . 'includes/integrations/loader.php' );
+
 		if ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) {
 
 			/**
@@ -116,7 +121,7 @@ class Awesome_Support {
 		 *
 		 * If we have a login in the post data we try to log the user in.
 		 * The login process relies on the WordPress core functions. If the login
-		 * is successfull the user is redirected to the page he was requesting,
+		 * is successful, the user is redirected to the page he was requesting,
 		 * otherwise the standard WordPress error messages are returned.
 		 *
 		 * @since 3.0.0
@@ -165,7 +170,18 @@ class Awesome_Support {
 		 */
 		if ( isset( $_POST['wpas_title'] ) ) {
 
-			$ticket_id = wpas_open_ticket( $_POST );
+			// Verify the nonce first
+			if ( ! isset( $_POST['wpas_nonce'] ) || ! wp_verify_nonce( $_POST['wpas_nonce'], 'new_ticket' ) ) {
+
+				/* Save the input */
+				wpas_save_values();
+
+				// Redirect to submit page
+				wp_redirect( add_query_arg( array( 'message' => 4 ), get_permalink( wpas_get_option( 'ticket_submit' ) ) ) );
+				exit;
+			}
+
+			$ticket_id = wpas_open_ticket( array( 'title' => $_POST['wpas_title'], 'message' => $_POST['wpas_message'] ) );
 
 			/* Submission failure */
 			if( false === $ticket_id ) {
@@ -189,13 +205,13 @@ class Awesome_Support {
 				 */
 				unset( $_SESSION['wpas_submission_form'] );
 				unset( $_SESSION['wpas_submission_error'] );
-				
+
 				/**
 				 * Redirect to the newly created ticket
 				 */
 				wpas_redirect( 'ticket_added', get_permalink( $ticket_id ), $ticket_id );
 				exit;
-				
+
 			}
 		}
 
@@ -279,7 +295,7 @@ class Awesome_Support {
 
 		/**
 		 * We only wanna alter the authentication process if the username was rejected.
-		 * If the error is different lwe let WordPress handle it.
+		 * If the error is different, we let WordPress handle it.
 		 */
 		if ( 'invalid_username' !== $user->get_error_code() ) {
 			return $user;
@@ -548,7 +564,7 @@ class Awesome_Support {
 		$admin      = get_role( 'administrator' );
 
 		/* Add the new roles */
-		$manager = add_role( 'wpas_manager',         __( 'Support Superviser', 'wpas' ), $editor->capabilities );     // Has full capabilities for the plugin in addition to editor capabilities
+		$manager = add_role( 'wpas_manager',         __( 'Support Supervisor', 'wpas' ), $editor->capabilities );     // Has full capabilities for the plugin in addition to editor capabilities
 		$tech    = add_role( 'wpas_support_manager', __( 'Support Manager', 'wpas' ),    $subscriber->capabilities ); // Has full capabilities for the plugin only
 		$agent   = add_role( 'wpas_agent',           __( 'Support Agent', 'wpas' ),      $author->capabilities );     // Has limited capabilities for the plugin in addition to author's capabilities
 		$client  = add_role( 'wpas_user',            __( 'Support User', 'wpas' ),       $subscriber->capabilities ); // Has posting & replying capapbilities for the plugin in addition to subscriber's capabilities
@@ -868,7 +884,7 @@ class Awesome_Support {
 			return false;
 		}
 
-		echo '<div style="display: none;"><div id="wpas-modalterms">' . wp_autop( wp_kses_post( $terms ) ) . '</div></div>';
+		echo '<div style="display: none;"><div id="wpas-modalterms">' . wpautop( wp_kses_post( $terms ) ) . '</div></div>';
 
 		return true;
 

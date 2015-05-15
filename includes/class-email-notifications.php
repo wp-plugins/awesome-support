@@ -511,21 +511,25 @@ class WPAS_Email_Notification {
 	 * Set the e-mail content type to HTML.
 	 *
 	 * @since  3.1.1
+	 *
 	 * @param  string $content_type Current e-mail content type
+	 *
 	 * @return string               HTML content type
 	 */
-	function set_html_mime_type( $content_type ){
+	public function set_html_mime_type( $content_type ) {
 		return 'text/html';
 	}
 
 	/**
 	 * Set the e-mail content type to plain text.
-	 * 
+	 *
 	 * @since  3.1.1
+	 *
 	 * @param  string $content_type Current e-mail content type
+	 *
 	 * @return string               Text content type
 	 */
-	function set_text_mime_type( $content_type ){
+	public function set_text_mime_type( $content_type ) {
 		return 'text/plain';
 	}
 
@@ -625,7 +629,7 @@ class WPAS_Email_Notification {
  * @since  3.0.2
  * @param  integer         $post_id ID of the post to notify about
  * @param  string|array    $cases   The case(s) to notify for
- * @return boolean|object           True if the notificaiton was sent, WP_Error or false otherwise
+ * @return boolean|object           True if the notification was sent, WP_Error or false otherwise
  */
 function wpas_email_notify( $post_id, $cases ) {
 

@@ -4,8 +4,8 @@ Contributors: themeavenue,julien731,SiamKreative
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=KADEESTQ9H3GW
 Tags: support,helpdesk,tickets,ticketing,help,support staff,
 Requires at least: 3.5.1
-Tested up to: 4.1
-Stable tag: 3.1.6
+Tested up to: 4.3
+Stable tag: 3.1.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -64,6 +64,8 @@ Want to know what’s next for Awesome Support? [Check out the roadmap](https://
 
 * Croatian (100%) - [Sanjin Barac](https://www.transifex.com/accounts/profile/4enter/)
 * Polish (100%) - [Borys Żmuda](https://www.transifex.com/accounts/profile/rudashi/)
+* Persian (10%) - [Vahid Arjmand](https://www.transifex.com/accounts/profile/tmediaa/)
+* Romanian (100%) - [picasso_ss](https://www.transifex.com/accounts/profile/picasso_ss/)
 
 You want to translate Awesome Support in your language? [Head over to the Transifex project](https://www.transifex.com/projects/p/awesome-support/)!
 
@@ -149,6 +151,30 @@ define( 'WPAS_DISABLE_AUTO_ASSIGN', true );
 7. Settings page
 
 == Changelog ==
+
+= 3.1.7 - 2015-05-15 =
+
+* Features:
+	* Ticket ID in tickets list table (admin)
+	* Direct link to last reply in tickets list table (admin)
+	* New system tools - Delete / Resync products synchronized with an e-commerce plugin
+
+* Translations:
+	* Polish translation
+	* Persian translation
+	* Romanian translation
+	
+* Bugfixes:
+	* Critical XSS vulnerability with custom information messages - props Anton Kulpinov
+	* Critical vulnerability with shortcodes allowed in replies - props Anton Kulpinov
+	* Call `wpautop()` correctly (there was a typo in the function name)
+	* When a ticket is closed, check for user's capability to close it
+	* Error messages correctly display on login / registration page - props [rudashi](https://github.com/rudashi)
+	* No mor ecalls to deprecated function `update_usermeta()` - props [rudashi](https://github.com/rudashi)
+	* Wrong URL to stylesheet when using baclslashes
+	* Wrong tickets count in admin, the count doesn't include trashed ticket anymore
+	* Correctly hide closed tickets if the option is enabled
+	* Compatibility issue with WooCOmmerce Cart Reports
 
 = 3.1.6 - 2015-03-19 =
 

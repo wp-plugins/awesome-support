@@ -111,3 +111,71 @@ function wpas_clear_taxonomies() {
 	return $deleted;
 
 }
+
+/**
+ * Delete the synchronized e-commerce products.
+ *
+ * The function goes through all the available products
+ * and deletes the associated synchronized terms along with
+ * the term taxonomy and term relationship. It also deleted
+ * the post metas where the taxonomy ID is stored.
+ *
+ * @param $resync boolean Whether or not to re-synchronize the products after deleting them
+ *
+ * @return        boolean True if the operation completed, false otherwise
+ * @since 3.1.7
+ */
+function wpas_delete_synced_products( $resync = false ) {
+
+	$post_type = filter_input( INPUT_GET, 'pt', FILTER_SANITIZE_STRING );
+
+	if ( empty( $post_type ) ) {
+		return false;
+	}
+
+	$sync  = new WPAS_Product_Sync( '', 'product' );
+	$posts = new WP_Query( array( 'post_type' => $post_type, 'posts_per_page' => -1, 'post_status' => 'any' ) );
+	$sync->set_post_type( $post_type );
+
+	if ( ! empty( $posts->posts ) ) {
+
+		/* Remove all terms and post metas */
+		foreach ( $posts->posts as $post ) {
+			$sync->unsync_term( $post->ID );
+		}
+
+	}
+
+	/* Now let's make sure we don't have some orphan post metas left */
+	global $wpdb;
+
+	$metas = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->postmeta} WHERE meta_key = '%s'", '_wpas_product_term' ) );
+
+	if ( ! empty( $metas ) ) {
+
+		foreach ( $metas as $meta ) {
+
+			$value = unserialize( $meta->meta_value );
+			$term = get_term_by( 'id', $value['term_id'], 'product' );
+
+			if ( empty( $term ) ) {
+				delete_post_meta( $meta->post_id, '_wpas_product_term' );
+			}
+
+		}
+
+	}
+
+	if ( true === $resync ) {
+
+		/* Delete the initial synchronization marker so that it's done again */
+		delete_option( "wpas_sync_$post_type" );
+
+		/* Synchronize */
+		$sync->run_initial_sync();
+
+	}
+
+	return true;
+
+}

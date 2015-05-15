@@ -15,7 +15,7 @@
 /**
  * Alter page content for single ticket.
  *
- * In order to ensure maximum complatibility with all themes,
+ * In order to ensure maximum compatibility with all themes,
  * we hook onto the_content instead of changing the entire template
  * for ticket single.
  *
@@ -132,7 +132,7 @@ function wpas_get_theme() {
  *
  * The function takes a template file name and loads it
  * from whatever location the template is found first.
- * The template is beeing searched for (in order) in
+ * The template is being searched for (in order) in
  * the child theme, the theme and the default templates
  * folder within the plugin.
  *
@@ -169,12 +169,15 @@ function wpas_get_template( $name, $args = array() ) {
  * template stored in the plugin's /templates directory.
  *
  * @since  3.0.0
- * @param  string $name  Name of the template to locate
+ *
+ * @param  string $name Name of the template to locate
+ *
+ * @return string Template path
  */
 function wpas_locate_template( $name ) {
 
-	$theme                 = wpas_get_theme();
-	$filename              = "$name.php";
+	$theme    = wpas_get_theme();
+	$filename = "$name.php";
 
 	$template = locate_template(
 		array(
@@ -182,8 +185,9 @@ function wpas_locate_template( $name ) {
 		)
 	);
 
-	if ( ! $template )
+	if ( ! $template ) {
 		$template = WPAS_PATH . "themes/$theme/" . $filename;
+	}
 
 	return apply_filters( 'wpas_locate_template', $template, $name );
 
@@ -235,7 +239,16 @@ function wpas_get_theme_stylesheet_uri() {
 		$template =  WPAS_PATH . "themes/$theme/css/style.css";
 	}
 
-	$uri = str_replace( ABSPATH, trailingslashit( home_url() ), $template );
+	/* Remove the root path and replace backslashes by slashes */
+	$truncate = str_replace('\\', '/', str_replace( untrailingslashit( ABSPATH ), '', $template ) );
+
+	/* Make sure the truncated string doesn't start with a slash because we trailing slash the home URL) */
+	if ( '/' === substr( $truncate, 0, 1 ) ) {
+		$truncate = substr( $truncate, 1 );
+	}
+
+	/* Build the final URL to the resource */
+	$uri = trailingslashit( home_url() ) . $truncate;
 
 	return apply_filters( 'wpas_get_theme_stylesheet_uri', $uri ); 
 
@@ -352,7 +365,7 @@ function wpas_get_reply_form( $args = array() ) {
 	/**
 	 * Filter the form class.
 	 *
-	 * This can be usesul for addons doing something on the reply form,
+	 * This can be useful for addons doing something on the reply form,
 	 * like adding an upload feature for instance.
 	 *
 	 * @since  3.0.0
@@ -437,15 +450,18 @@ function wpas_get_reply_form( $args = array() ) {
 			 *
 			 * @since  3.0.0
 			 */
-			do_action( 'wpas_ticket_details_reply_textarea_after' ); ?>
+			do_action( 'wpas_ticket_details_reply_textarea_after' );
 
-			<div class="checkbox">
-				<label for="close_ticket" data-toggle="tooltip" data-placement="right" title="" data-original-title="<?php _e( 'No reply is required to close', 'wpas' ); ?>">
-					<input type="checkbox" name="wpas_close_ticket" id="close_ticket" value="true"> <?php _e( 'Close this ticket', 'wpas' ); ?>
-				</label>
-			</div>
+			if ( current_user_can( 'close_ticket' ) ): ?>
 
-			<?php
+				<div class="checkbox">
+					<label for="close_ticket" data-toggle="tooltip" data-placement="right" title="" data-original-title="<?php _e( 'No reply is required to close', 'wpas' ); ?>">
+						<input type="checkbox" name="wpas_close_ticket" id="close_ticket" value="true"> <?php _e( 'Close this ticket', 'wpas' ); ?>
+					</label>
+				</div>
+
+			<?php endif;
+			
 			/**
 			 * wpas_ticket_details_reply_close_checkbox_after hook
 			 *
