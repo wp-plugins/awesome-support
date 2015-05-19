@@ -282,7 +282,7 @@ define( 'WPAS_DISABLE_AUTO_ASSIGN', true );
 
 == Upgrade Notice ==
 
-Lots of bugfixes
+Significant performance improvements, both on the front-end and the back-end.
 
 == Roadmap ==
 
