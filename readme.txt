@@ -5,7 +5,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: support,helpdesk,tickets,ticketing,help,support staff,
 Requires at least: 3.5.1
 Tested up to: 4.3
-Stable tag: 3.1.7
+Stable tag: 3.1.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -13,9 +13,9 @@ The most advanced support plugin for WordPress. Provide awesome support straight
 
 == Description ==
 
-https://www.youtube.com/watch?v=IdSOWQI3tWU
-
 Awesome Support is the most advanced support plugin for WordPress. It is the result of two years of work, research, and improvement. Most of its features are an answer to user requests for a helpdesk and that's what makes it the best support plugin for WordPress.
+
+https://www.youtube.com/watch?v=IdSOWQI3tWU
 
 For support please visit the [official site](http://getawesomesupport.com).
 
@@ -152,6 +152,17 @@ define( 'WPAS_DISABLE_AUTO_ASSIGN', true );
 
 == Changelog ==
 
+= 3.1.8 - 2015-05-19 =
+
+* Features
+	* Ticket submission on front-end is now about 50% faster
+	* Significant performance improvement in the back-end
+
+* Bugfixes:
+	* Fix the PHP warning on ticket submission
+	* Hide others tickets in admin if set this way in the settings
+	* Fix issue with translations not working on some sites
+
 = 3.1.7 - 2015-05-15 =
 
 * Features:
@@ -163,7 +174,7 @@ define( 'WPAS_DISABLE_AUTO_ASSIGN', true );
 	* Polish translation
 	* Persian translation
 	* Romanian translation
-	
+
 * Bugfixes:
 	* Critical XSS vulnerability with custom information messages - props Anton Kulpinov
 	* Critical vulnerability with shortcodes allowed in replies - props Anton Kulpinov

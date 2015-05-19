@@ -57,11 +57,11 @@ class Awesome_Support {
 			 */
 			add_action( 'wp',                             array( $this, 'get_replies_object' ),              10, 0 ); // Generate the object used for the custom loop for displaying ticket replies
 			add_action( 'wpmu_new_blog',                  array( $this, 'activate_new_site' ),               10, 0 ); // Activate plugin when new blog is added
-			add_action( 'plugins_loaded',                 array( $this, 'load_plugin_textdomain' ),           9, 0 ); // Load the plugin textdomain
+			add_action( 'plugins_loaded',                 array( $this, 'load_plugin_textdomain' ),          11, 0 ); // Load the plugin textdomain
 			add_action( 'init',                           array( $this, 'init' ),                            11, 0 ); // Register main post type
 			add_action( 'admin_bar_menu',                 array( $this, 'toolbar_tickets_link' ),           999, 1 ); // Add a link to agent's tickets in the toolbar
-			add_action( 'wp_print_styles',                array( $this, 'enqueue_styles' ),                  10, 0 ); // Load public-facing style sheets
-			add_action( 'wp_print_scripts',               array( $this, 'enqueue_scripts' ),                 10, 0 ); // Load public-facing JavaScripts
+			add_action( 'wp_enqueue_scripts',             array( $this, 'enqueue_styles' ),                  10, 0 ); // Load public-facing style sheets
+			add_action( 'wp_enqueue_scripts',             array( $this, 'enqueue_scripts' ),                 10, 0 ); // Load public-facing JavaScripts
 			add_action( 'template_redirect',              array( $this, 'redirect_archive' ),                10, 0 );
 			add_action( 'wpas_after_registration_fields', array( $this, 'terms_and_conditions_checkbox' ),   10, 3 ); // Add terms & conditions checkbox
 			add_action( 'wpas_after_template',            array( $this, 'terms_and_conditions_modal' ),      10, 3 ); // Load the terms and conditions in a hidden div in the footer
@@ -192,6 +192,7 @@ class Awesome_Support {
 				/**
 				 * Redirect to the newly created ticket
 				 */
+				$submit = wpas_get_option( 'ticket_submit' );
 				wpas_redirect( 'ticket_added_failed', add_query_arg( array( 'message' => 6 ), get_permalink( $submit ) ), $submit );
 				exit;
 
@@ -234,12 +235,15 @@ class Awesome_Support {
 			 */
 			$can_submit_empty = apply_filters( 'wpas_can_reply_be_empty', false );
 
+			/**
+			 * Get the parent ticket ID.
+			 */
+			$parent_id = intval( $_POST['ticket_id'] );
+
 			if ( empty( $_POST['wpas_user_reply'] ) && false === $can_submit_empty ) {
 				wpas_redirect( 'reply_not_added', add_query_arg( array( 'message' => wpas_create_notification( __( 'You cannot submit an empty reply.', 'wpas' ) ) ), get_permalink( $parent_id ) ), $parent_id );
 				exit;
 			}
-
-			$parent_id = intval( $_POST['ticket_id'] );
 
 			/* Sanitize the data */
 			$data = array( 'post_content' => wp_kses( $_POST['wpas_user_reply'], wp_kses_allowed_html( 'post' ) ) );
@@ -273,10 +277,12 @@ class Awesome_Support {
 	 * Allow e-mail to be used as the login.
 	 *
 	 * @since  3.0.2
-	 * @param  null|WP_User $user     User to authenticate.
-	 * @param  string       $username User login
-	 * @param  string       $password User password
-	 * @return object                 WP_User if authentication succeed, WP_Error on failure
+	 *
+	 * @param  WP_User|WP_Error|null $user     User to authenticate.
+	 * @param  string                $username User login
+	 * @param  string                $password User password
+	 *
+	 * @return object                          WP_User if authentication succeed, WP_Error on failure
 	 */
 	public function email_signon( $user, $username, $password ) {
 
@@ -289,7 +295,7 @@ class Awesome_Support {
 		 * If the $user isn't a WP_User object nor a WP_Error
 		 * we don' touch it and let WordPress handle it.
 		 */
-		if ( !is_wp_error( $user ) ) {
+		if ( ! is_wp_error( $user ) ) {
 			return $user;
 		}
 
@@ -305,7 +311,7 @@ class Awesome_Support {
 		 * If the username is not an e-mail there is nothing else we can do,
 		 * the error is probably legitimate.
 		 */
-		if ( !is_email( $username ) ) {
+		if ( ! is_email( $username ) ) {
 			return $user;
 		}
 
@@ -316,7 +322,7 @@ class Awesome_Support {
 		 * If there is no user with this e-mail the error is legitimate
 		 * so let's just return it.
 		 */
-		if ( false === $user_data || !is_a( $user_data, 'WP_User' ) ) {
+		if ( false === $user_data || ! is_a( $user_data, 'WP_User' ) ) {
 			return $user;
 		}
 
@@ -407,43 +413,6 @@ class Awesome_Support {
 
 		} else {
 			self::single_activate();
-		}
-
-	}
-
-	/**
-	 * Fired when the plugin is deactivated.
-	 *
-	 * @since    1.0.0
-	 * @param    boolean    $network_wide    True if WPMU superadmin uses
-	 *                                       "Network Deactivate" action, false if
-	 *                                       WPMU is disabled or plugin is
-	 *                                       deactivated on an individual blog.
-	 */
-	public static function deactivate( $network_wide ) {
-
-		if ( function_exists( 'is_multisite' ) && is_multisite() ) {
-
-			if ( $network_wide ) {
-
-				// Get all blog ids
-				$blog_ids = self::get_blog_ids();
-
-				foreach ( $blog_ids as $blog_id ) {
-
-					switch_to_blog( $blog_id );
-					self::single_deactivate();
-
-				}
-
-				restore_current_blog();
-
-			} else {
-				self::single_deactivate();
-			}
-
-		} else {
-			self::single_deactivate();
 		}
 
 	}
@@ -615,17 +584,9 @@ class Awesome_Support {
 	}
 
 	/**
-	 * Fired for each blog when the plugin is deactivated.
-	 *
-	 * @since    1.0.0
-	 */
-	private static function single_deactivate() {
-		// @TODO: Define deactivation functionality here
-	}
-
-	/**
 	 * Load the plugin text domain for translation.
 	 *
+	 * @return boolean True if the language file was loaded, false otherwise
 	 * @since    1.0.0
 	 */
 	public function load_plugin_textdomain() {
@@ -651,7 +612,7 @@ class Awesome_Support {
 			$locale = $wpas_locale;
 		}
 
-		load_plugin_textdomain( 'wpas', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+		$language = load_plugin_textdomain( 'wpas', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 
 		/**
 		 * Reset the $locale after loading our language file
@@ -659,6 +620,8 @@ class Awesome_Support {
 		if ( ! empty( $wpas_locale ) ) {
 			$locale = $backup;
 		}
+
+		return $language;
 
 	}
 
@@ -865,18 +828,16 @@ class Awesome_Support {
 	 * is on the submission page.
 	 *
 	 * @since  3.0.0
-	 * @param  string  $name     Template name
-	 * @param  string  $template Path to the template that was loaded
-	 * @param  array   $args     Extra arguments passed when loading the template
+	 *
+	 * @param  string $name Template name
+	 *
 	 * @return boolean           True if the modal is loaded, false otherwise
 	 */
-	public function terms_and_conditions_modal( $name, $template, $args ) {
+	public function terms_and_conditions_modal( $name ) {
 
 		if ( 'registration' !== $name ) {
 			return false;
 		}
-
-		global $post;
 
 		$terms = wpas_get_option( 'terms_conditions', '' );
 
@@ -989,7 +950,7 @@ class Awesome_Support {
 	 * @since  3.1.3
 	 * @return void
 	 */
-	public function credit( $name, $template, $args ) {
+	public function credit() {
 		echo '<p class="wpas-credit">Built with Awesome Support,<br> the most versatile <a href="https://wordpress.org/plugins/awesome-support/" target="_blank" title="The best support plugin for WordPress">WordPress Support Plugin</a></p>';
 	}
 

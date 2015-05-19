@@ -10,7 +10,7 @@
  * Plugin Name:       Awesome Support
  * Plugin URI:        http://getawesomesupport.com
  * Description:       Awesome Support is a great ticketing system that will help you improve your customer satisfaction by providing a unique customer support experience.
- * Version:           3.1.7
+ * Version:           3.1.8
  * Author:            ThemeAvenue
  * Author URI:        http://themeavenue.net
  * Text Domain:       wpas
@@ -28,7 +28,7 @@ if ( ! defined( 'WPINC' ) ) {
  * Shortcuts
  *----------------------------------------------------------------------------*/
 
-define( 'WPAS_VERSION',           '3.1.7' );
+define( 'WPAS_VERSION',           '3.1.8' );
 define( 'WPAS_DB_VERSION',        '1' );
 define( 'WPAS_URL',               trailingslashit( plugin_dir_url( __FILE__ ) ) );
 define( 'WPAS_PATH',              trailingslashit( plugin_dir_path( __FILE__ ) ) );
@@ -67,7 +67,6 @@ require_once( WPAS_PATH . 'class-awesome-support.php' );
  * When the plugin is deleted, the uninstall.php file is loaded.
  */
 register_activation_hook( __FILE__, array( 'Awesome_Support', 'activate' ) );
-register_deactivation_hook( __FILE__, array( 'Awesome_Support', 'deactivate' ) );
 
 /**
  * Get an instance of the plugin
