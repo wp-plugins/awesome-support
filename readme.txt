@@ -5,7 +5,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: support,helpdesk,tickets,ticketing,help,support staff,
 Requires at least: 3.5.1
 Tested up to: 4.3
-Stable tag: 3.1.9
+Stable tag: 3.1.10
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -151,6 +151,11 @@ define( 'WPAS_DISABLE_AUTO_ASSIGN', true );
 7. Settings page
 
 == Changelog ==
+
+= 3.1.10 - 2015-05-20 =
+
+* More performance improvements
+* Fixes "Got a packet bigger than ‘max_allowed_packet’ bytes" issue on sites with lots of users
 
 = 3.1.9 - 2015-05-20 =
 
