@@ -11,15 +11,7 @@
  */
 global $post, $wpas_notification;
 
-$submit = get_permalink( wpas_get_option( 'ticket_list' ) );
-
-/**
- * If there is a message to display we show a bootstrap info box
- */
-if ( isset( $_GET['message'] ) && ! empty( $_GET['message'] ) ) {
-	wpas_notification( 'decode' );
-}
-
+$submit        = get_permalink( wpas_get_option( 'ticket_list' ) );
 $registration  = boolval( wpas_get_option( 'allow_registrations', true ) ); // Make sure registrations are open
 $redirect_to   = get_permalink( $post->ID );
 $wrapper_class = true !== $registration ? 'wpas-login-only' : 'wpas-login-register';
@@ -54,7 +46,7 @@ $wrapper_class = true !== $registration ? 'wpas-login-only' : 'wpas-login-regist
 		?>
 
 		<div class="wpas-checkbox">
-			<label><input type="checkbox" name="rememberme" class="wpas-form-control-checkbox"> <?php echo _e( 'Remember Me' ); ?></label>
+			<label><input type="checkbox" name="rememberme" class="wpas-form-control-checkbox"> <?php _e( 'Remember Me' ); ?></label>
 		</div>
 
 		<input type="hidden" name="redirect_to" value="<?php echo $redirect_to; ?>">

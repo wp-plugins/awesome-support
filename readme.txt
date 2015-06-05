@@ -5,7 +5,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: support,helpdesk,tickets,ticketing,help,support staff,
 Requires at least: 3.5.1
 Tested up to: 4.3
-Stable tag: 3.1.10
+Stable tag: 3.1.11
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -62,10 +62,11 @@ Want to know what’s next for Awesome Support? [Check out the roadmap](https://
 
 = Translations =
 
-* Croatian (100%) - [Sanjin Barac](https://www.transifex.com/accounts/profile/4enter/)
-* Polish (100%) - [Borys Żmuda](https://www.transifex.com/accounts/profile/rudashi/)
-* Persian (10%) - [Vahid Arjmand](https://www.transifex.com/accounts/profile/tmediaa/)
-* Romanian (100%) - [picasso_ss](https://www.transifex.com/accounts/profile/picasso_ss/)
+* [Croatian](https://www.transifex.com/organization/themeavenue/team/31256/members/hr/)
+* [Polish](https://www.transifex.com/organization/themeavenue/team/31256/members/pl_PL/)
+* [Persian](https://www.transifex.com/organization/themeavenue/team/31256/members/fa/)
+* [Romanian](https://www.transifex.com/organization/themeavenue/team/31256/members/ro_RO/)
+* [Portuguese (Brazil)](https://www.transifex.com/organization/themeavenue/team/31256/members/pt_BR/)
 
 You want to translate Awesome Support in your language? [Head over to the Transifex project](https://www.transifex.com/projects/p/awesome-support/)!
 
@@ -151,6 +152,18 @@ define( 'WPAS_DISABLE_AUTO_ASSIGN', true );
 7. Settings page
 
 == Changelog ==
+
+= 3.1.11 - 2015-06-05 =
+
+* Features
+	* Improve tests coverage
+	* Add Portuguese (Brazil) translation
+
+* Bugfixes
+	* Error messages on plugin pages always show
+	* Only synchronize e-commerce products that are published
+	* Show all the synchronized products in the taxonomy screen
+	* Remove a couple of PHP notices
 
 = 3.1.10 - 2015-05-20 =
 
@@ -291,7 +304,7 @@ define( 'WPAS_DISABLE_AUTO_ASSIGN', true );
 
 == Upgrade Notice ==
 
-Significant performance improvements, both on the front-end and the back-end.
+Fixes a few issues with e-commerce product synchronization.
 
 == Roadmap ==
 
