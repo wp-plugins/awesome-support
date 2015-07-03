@@ -5,7 +5,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: support,helpdesk,tickets,ticketing,help,support staff,
 Requires at least: 3.5.1
 Tested up to: 4.3
-Stable tag: 3.1.11
+Stable tag: 3.1.12
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -152,6 +152,24 @@ define( 'WPAS_DISABLE_AUTO_ASSIGN', true );
 7. Settings page
 
 == Changelog ==
+
+= 3.1.12 - 2015-07-03 =
+
+* Features
+	* Add new hook to filter who can view a ticket (`wpas_can_view_ticket`)
+	* Add new filter to change the allowed file types layout for uploads (`wpas_attachments_filetypes_display`) - props [digitalchild](https://github.com/digitalchild)
+	* Add new filter `wpas_before_login_form` - props [Vasik](https://github.com/vasikgreif)
+
+* Bugfixes
+	* Remove double notification on ticket submission page
+	* Fix issue escaped characters in e-mail notifcations
+	* Add support for sites using HTTPS on front-end but not admin
+	* Fix issue with custom fields not showing in admin when using custom callback function
+	* Style custom fields in admin
+	* Fix addons not displaying in the addon page
+
+* Translations
+	* Portuguese (Brazil)
 
 = 3.1.11 - 2015-06-05 =
 
@@ -304,7 +322,7 @@ define( 'WPAS_DISABLE_AUTO_ASSIGN', true );
 
 == Upgrade Notice ==
 
-Fixes a few issues with e-commerce product synchronization.
+Mostly bugfixes.
 
 == Roadmap ==
 
